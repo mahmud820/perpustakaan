@@ -1,0 +1,55 @@
+/* DAFTAR BUKU */
+.daftar-buku-section {
+  position: relative;
+  min-height: 100vh;
+  padding-top: 60px;
+  padding-bottom: 40px;
+  background: url('../../img/background/background3.jpg') no-repeat center center;
+  background-size: cover;
+}
+
+/* Overlay */
+/* .daftar-buku-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+} */
+
+/* Isi */
+.daftar-buku-section .container {
+  position: relative;
+  z-index: 2;
+}
+
+/* Judul */
+.section-title {
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Card */
+.daftar-buku-section .card {
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+  transition: 0.3s;
+}
+
+.daftar-buku-section .card:hover {
+  transform: translateY(-5px);
+}
+
+.daftar-buku-section .card-img-top {
+  height: 320px;
+  object-fit: cover;
+}
+
+.daftar-buku-section .card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.daftar-buku-section .card-text {
+  flex-grow: 1;
+}

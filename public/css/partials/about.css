@@ -1,0 +1,30 @@
+/* About */
+.about-fullscreen {
+  position: relative;
+  min-height: 100vh;
+  background: url("../../img/background/background4.jpg") no-repeat center center;
+  background-size: cover;
+  display: flex;
+  align-items: start;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  padding: 120px 20px 60px;
+}
+
+.about-fullscreen .container {
+  z-index: 10;
+}
+
+.highlight-box {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #333;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+}
+
+.highlight-box:hover {
+  transform: translateY(-5px);
+}

@@ -1,0 +1,26 @@
+/* Tampilan Detail */
+.detail-page {
+    min-height: 100vh;
+    background: url('../../img//background/background2.jpg') center center / cover no-repeat;
+}
+
+.overlay {
+    min-height: 100vh;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.book-cover {
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+}
+
+.detail-card {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.card {
+    border-radius: 20px;
+}

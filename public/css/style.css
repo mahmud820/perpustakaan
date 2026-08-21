@@ -1,0 +1,31 @@
+@import url('partials/navbar.css');
+@import url('partials/beranda.css');
+@import url('partials/footer.css');
+@import url('partials/daftarbuku.css');
+@import url('partials/kontak.css');
+@import url('partials/about.css');
+@import url('partials/detail.css');
+
+/* Reset dasar */
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Layout utama */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Konten utama */
+main {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+}
