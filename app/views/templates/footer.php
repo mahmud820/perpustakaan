@@ -59,13 +59,14 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
 <script>
-  const BASEURL = '<?= BASEURL; ?>';
+    const BASEURL = '<?= BASEURL; ?>';
 </script>
 
 <!-- SweetAlert harus sebelum buku.js -->
 <!-- <script src="<?= BASEURL; ?>/sweetalert/sweetalert2.all.min.js"></script> -->
 
 <script src="<?= BASEURL; ?>/js/buatanSendiri/buku.js"></script>
+<script src="<?= BASEURL; ?>/js/buatanSendiri/admin.js"></script>
 
 </body>
 

@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="<?= htmlspecialchars(Csrf::token()); ?>">
   <title>Perpustakaan</title>
 
   <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"> -->
@@ -55,6 +56,27 @@
           <li class="nav-item">
             <a class="nav-link" href="<?= BASEURL; ?>/about">About</a>
           </li>
+
+          <?php if (AuthMiddleware::isAdmin()) : ?>
+            <li class="nav-item">
+              <a class="nav-link" href="<?= BASEURL; ?>/admin">Admin</a>
+            </li>
+          <?php endif; ?>
+
+          <?php if (AuthMiddleware::isLogin()) : ?>
+            <li class="nav-item">
+              <span class="nav-link">
+                Halo, <?= htmlspecialchars($_SESSION['nama'] ?? ''); ?>
+              </span>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="<?= BASEURL; ?>/auth/logout">Logout</a>
+            </li>
+          <?php else : ?>
+            <li class="nav-item">
+              <a class="nav-link" href="<?= BASEURL; ?>/login">Login</a>
+            </li>
+          <?php endif; ?>
         </ul>
 
       </div>

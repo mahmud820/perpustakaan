@@ -1,10 +1,11 @@
-@import url('partials/navbar.css');
-@import url('partials/beranda.css');
-@import url('partials/footer.css');
-@import url('partials/daftarbuku.css');
-@import url('partials/kontak.css');
-@import url('partials/about.css');
-@import url('partials/detail.css');
+@import url("partials/navbar.css");
+@import url("partials/beranda.css");
+@import url("partials/footer.css");
+@import url("partials/daftarbuku.css");
+@import url("partials/kontak.css");
+@import url("partials/about.css");
+@import url("partials/detail.css");
+@import url("partials/admin.css");
 
 /* Reset dasar */
 html,

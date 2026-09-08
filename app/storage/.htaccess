@@ -1,0 +1,3 @@
+# Defense in depth: tolak akses langsung jika folder ini pernah ter-expose lewat webroot
+Require all denied
+Deny from all

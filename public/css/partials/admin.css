@@ -1,0 +1,10 @@
+/* DASHBOARD ADMIN */
+.admin-buku-table td,
+.admin-buku-table th {
+  vertical-align: middle;
+}
+
+.admin-buku-table .halaman-dibaca-input,
+.admin-buku-table .total-halaman-input {
+  text-align: center;
+}

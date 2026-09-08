@@ -1,0 +1,24 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #f8fafc;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.login-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 50%;
+}

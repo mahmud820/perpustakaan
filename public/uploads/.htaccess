@@ -1,0 +1,13 @@
+# Cegah eksekusi PHP/CGI di folder upload, walau nama file di-brute-force tebak.
+# Defense in depth di atas validasi MIME + magic bytes yang sudah dilakukan di aplikasi.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|pht|phar)$">
+    Require all denied
+</FilesMatch>
+
+Options -Indexes -ExecCGI
+AddHandler cgi-script .php .phtml .pl .py .jsp .asp .sh .cgi
+Options -ExecCGI

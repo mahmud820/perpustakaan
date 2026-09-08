@@ -9,33 +9,55 @@ class App {
   {
     $url = $this->parseUrl();
 
-    // controller
-    if (!empty($url) && file_exists('../app/controllers/' . $url[0] . '.php')) {
-      $this->controller = $url[0];
+    if (!empty($url) && strtolower($url[0]) === 'login') {
+      $this->controller = 'Auth';
+      $this->method = 'login';
       unset($url[0]);
-    } else if (!empty($url)){
-      die ("Controller <strong>{$url[0]}</strong> tidak ditemukan.");
+    } else if (!empty($url)) {
+      $controllerName = $this->resolveControllerName($url[0]);
+
+      if ($controllerName) {
+        $this->controller = $controllerName;
+        unset($url[0]);
+      } else {
+        die ("Controller <strong>{$url[0]}</strong> tidak ditemukan.");
+      }
     }
 
     require_once '../app/controllers/' . $this->controller . '.php';
     $this->controller = new $this->controller;
 
-    // method
     if (isset($url[1])) {
       if (method_exists($this->controller, $url[1])) {
         $this->method = $url[1];
         unset($url[1]);
       }
-    } 
-    // else {
-    // //   die ("Method <strong>{$url[1]}</strong> tidak ditemukan di controller {$this->controller}");
-    // // }
+    }
 
-    // params
     $this->params = !empty($url) ? array_values($url) : [];
 
-    // jalankan controller & method, serta kirimkan params jika ada
     call_user_func_array([$this->controller, $this->method], $this->params);
+  }
+
+  private function resolveControllerName($name)
+  {
+    if (empty($name)) {
+      return null;
+    }
+
+    if (file_exists('../app/controllers/' . $name . '.php')) {
+      return $name;
+    }
+
+    $files = scandir('../app/controllers');
+
+    foreach ($files as $file) {
+      if (strtolower($file) === strtolower($name) . '.php') {
+        return pathinfo($file, PATHINFO_FILENAME);
+      }
+    }
+
+    return null;
   }
 
   public function parseUrl() 

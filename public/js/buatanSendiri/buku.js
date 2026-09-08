@@ -1,200 +1,203 @@
-// Fitur Tambah & Update Buku
-const addBookForm = document.getElementById('addBookForm');
-const addBookModal = document.getElementById('addBookModal');
+// Semua elemen di bawah ini HANYA ada di halaman Daftar Buku.
+// File ini dimuat di semua halaman (lewat footer), jadi setiap blok
+// dibungkus pengecekan null agar tidak error di halaman lain.
 
-addBookForm.addEventListener('submit', async function (e) {
+// =========================
+// CSRF helper
+// Token diambil dari <meta name="csrf-token"> yang dirender server (lihat header.php)
+// dan dikirim lewat header X-CSRF-Token di setiap request state-changing (POST).
+// =========================
+function getCsrfToken() {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  return meta ? meta.getAttribute("content") : "";
+}
+
+function csrfHeaders(extra = {}) {
+  return Object.assign({ "X-CSRF-Token": getCsrfToken() }, extra);
+}
+
+const addBookForm = document.getElementById("addBookForm");
+const addBookModal = document.getElementById("addBookModal");
+
+if (addBookForm && addBookModal) {
+  // Fitur Tambah & Update Buku
+  addBookForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
     const formData = new FormData(this);
 
     try {
+      const id = formData.get("id");
 
-        const id = formData.get('id');
+      const url = id
+        ? BASEURL + "/daftarBuku/update"
+        : BASEURL + "/daftarBuku/tambah";
 
-        const url = id
-            ? BASEURL + '/daftarBuku/update'
-            : BASEURL + '/daftarBuku/tambah';
+      const response = await fetch(url, {
+        method: "POST",
+        headers: csrfHeaders(),
+        body: formData,
+      });
 
-        const response = await fetch(url, {
-            method: 'POST',
-            body: formData
-        });
+      const result = await response.text();
 
-        const result = await response.text();
+      if (response.ok && result.trim() === "success") {
+        const modal = bootstrap.Modal.getInstance(addBookModal);
 
-        if (result.trim() === 'success') {
-
-            const modal = bootstrap.Modal.getInstance(addBookModal);
-
-            modal.hide();
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil',
-                text: id
-                    ? 'Buku berhasil diupdate'
-                    : 'Buku berhasil ditambahkan',
-                timer: 1500,
-                showConfirmButton: false
-            }).then(() => {
-                location.reload();
-            });
-
-        } else {
-
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: id
-                    ? 'Buku gagal diupdate'
-                    : 'Buku gagal ditambahkan'
-            });
-
-        }
-
-    } catch (error) {
-
-        console.error(error);
+        modal.hide();
 
         Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Terjadi kesalahan pada server'
+          icon: "success",
+          title: "Berhasil",
+          text: id ? "Buku berhasil diupdate" : "Buku berhasil ditambahkan",
+          timer: 1500,
+          showConfirmButton: false,
+        }).then(() => {
+          location.reload();
         });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal",
+          text: result.trim() || "Terjadi kesalahan",
+        });
+      }
+    } catch (error) {
+      console.error(error);
 
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Terjadi kesalahan pada server",
+      });
     }
-});
+  });
 
-
-// Reset Modal Saat Ditutup
-addBookModal.addEventListener('hidden.bs.modal', function () {
-
+  // Reset Modal Saat Ditutup
+  addBookModal.addEventListener("hidden.bs.modal", function () {
     addBookForm.reset();
 
-    document.getElementById('id').value = '';
-    document.getElementById('cover_lama').value = '';
+    document.getElementById("id").value = "";
+    document.getElementById("cover_lama").value = "";
+    document.getElementById("file_baca_lama").value = "";
 
-    document.querySelector('.modal-title').textContent =
-        'Tambah Buku';
+    const fileBacaInfo = document.getElementById("fileBacaInfo");
+    if (fileBacaInfo) fileBacaInfo.textContent = "";
 
-    document.querySelector(
-        '#addBookForm button[type="submit"]'
-    ).textContent = 'Simpan';
+    const hapusWrapper = document.getElementById("hapusFileBacaWrapper");
+    if (hapusWrapper) hapusWrapper.classList.add("d-none");
 
-});
+    const hapusCheckbox = document.getElementById("hapus_file_baca");
+    if (hapusCheckbox) hapusCheckbox.checked = false;
 
+    document.querySelector(".modal-title").textContent = "Tambah Buku";
 
-// Fitur Edit Buku
-document.querySelectorAll('.btn-edit').forEach(button => {
+    document.querySelector('#addBookForm button[type="submit"]').textContent =
+      "Simpan";
+  });
 
-    button.addEventListener('click', function () {
+  // Fitur Edit Buku
+  document.querySelectorAll(".btn-edit").forEach((button) => {
+    button.addEventListener("click", function () {
+      document.getElementById("id").value = this.dataset.id;
 
-        document.getElementById('id').value =
-            this.dataset.id;
+      document.getElementById("cover_lama").value = this.dataset.cover;
+      document.getElementById("file_baca_lama").value =
+        this.dataset.fileBaca || "";
 
-        document.getElementById('cover_lama').value =
-            this.dataset.cover;
+      document.querySelector('[name="judul"]').value = this.dataset.judul;
 
-        document.querySelector('[name="judul"]').value =
-            this.dataset.judul;
+      document.querySelector('[name="penulis"]').value = this.dataset.penulis;
 
-        document.querySelector('[name="penulis"]').value =
-            this.dataset.penulis;
+      document.querySelector('[name="klasifikasi"]').value =
+        this.dataset.klasifikasi;
 
-        document.querySelector('[name="klasifikasi"]').value =
-            this.dataset.klasifikasi;
+      document.querySelector('[name="sinopsis"]').value = this.dataset.sinopsis;
 
-        document.querySelector('[name="sinopsis"]').value =
-            this.dataset.sinopsis;
+      document.querySelector('[name="link_baca"]').value =
+        this.dataset.linkBaca;
 
-        document.querySelector('[name="link_baca"]').value =
-            this.dataset.linkBaca;
+      // File input tidak bisa diisi otomatis oleh browser (alasan keamanan),
+      // jadi cukup tampilkan info file yang sudah ada saat ini.
+      const fileBacaInfo = document.getElementById("fileBacaInfo");
+      const hapusWrapper = document.getElementById("hapusFileBacaWrapper");
 
-        document.querySelector('.modal-title').textContent =
-            'Edit Buku';
+      if (this.dataset.fileBaca) {
+        if (fileBacaInfo) {
+          fileBacaInfo.textContent = "File saat ini: " + this.dataset.fileBaca;
+        }
+        if (hapusWrapper) hapusWrapper.classList.remove("d-none");
+      } else {
+        if (fileBacaInfo) fileBacaInfo.textContent = "";
+        if (hapusWrapper) hapusWrapper.classList.add("d-none");
+      }
 
-        document.querySelector(
-            '#addBookForm button[type="submit"]'
-        ).textContent = 'Update';
+      document.querySelector(".modal-title").textContent = "Edit Buku";
 
-        const modal = new bootstrap.Modal(addBookModal);
+      document.querySelector('#addBookForm button[type="submit"]').textContent =
+        "Update";
 
-        modal.show();
+      const modal = new bootstrap.Modal(addBookModal);
 
+      modal.show();
     });
-
-});
+  });
+}
 
 // Fitur Hapus
-document.querySelectorAll('.btn-delete').forEach(button => {
+document.querySelectorAll(".btn-delete").forEach((button) => {
+  button.addEventListener("click", async function () {
+    const id = this.dataset.id;
 
-    button.addEventListener('click', async function () {
-
-        const id = this.dataset.id;
-        const cover = this.dataset.cover;
-
-        const result = await Swal.fire({
-            title: 'Yakin?',
-            text: 'Data buku akan dihapus',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Hapus',
-            cancelButtonText: 'Batal'
-        });
-
-        if (!result.isConfirmed) return;
-
-        try {
-
-            const formData = new FormData();
-
-            formData.append('id', id);
-            formData.append('cover', cover);
-
-            const response = await fetch(
-                BASEURL + '/daftarBuku/hapus',
-                {
-                    method: 'POST',
-                    body: formData
-                }
-            );
-
-            const hasil = await response.text();
-
-            if (hasil.trim() === 'success') {
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: 'Buku berhasil dihapus',
-                    timer: 1500,
-                    showConfirmButton: false
-                }).then(() => {
-                    location.reload();
-                });
-
-            } else {
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: 'Buku gagal dihapus'
-                });
-
-            }
-
-        } catch (error) {
-
-            console.error(error);
-
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Terjadi kesalahan pada server'
-            });
-
-        }
-
+    const result = await Swal.fire({
+      title: "Yakin?",
+      text: "Data buku akan dihapus",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
     });
 
+    if (!result.isConfirmed) return;
+
+    try {
+      const formData = new FormData();
+
+      formData.append("id", id);
+
+      const response = await fetch(BASEURL + "/daftarBuku/hapus", {
+        method: "POST",
+        headers: csrfHeaders(),
+        body: formData,
+      });
+
+      const hasil = await response.text();
+
+      if (hasil.trim() === "success") {
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil",
+          text: "Buku berhasil dihapus",
+          timer: 1500,
+          showConfirmButton: false,
+        }).then(() => {
+          location.reload();
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal",
+          text: "Buku gagal dihapus",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Terjadi kesalahan pada server",
+      });
+    }
+  });
 });

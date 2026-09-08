@@ -7,9 +7,13 @@ require_once 'config/config.php';
 require_once 'core/App.php';
 require_once 'core/Controller.php';
 require_once 'core/Database.php';
+require_once 'core/AuthMiddleware.php';
+require_once 'core/Csrf.php';
+require_once 'core/LoginThrottle.php';
+
 
 // Autoload untuk controllers dan models
-spl_autoload_register(function($class) {
+spl_autoload_register(function ($class) {
     $controllerPath = 'controllers/' . $class . '.php';
     $modelPath = 'models/' . $class . '.php';
 
