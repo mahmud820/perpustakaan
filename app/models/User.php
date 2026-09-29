@@ -44,63 +44,26 @@ class User
         return $this->db->single();
     }
 
-    // =========================
-    // UPDATE PROFIL USER
-    // Return: ['success' => true, 'gambar' => namaFileBaru] jika berhasil,
-    //         atau ['success' => false, 'error' => pesan] jika gagal validasi.
-    // =========================
     public function updateProfileData($data, $files)
     {
         $id = $_SESSION['user_id'];
 
-        // Sanitasi ringan: trim saja di sini
-        // Escaping untuk tampilan (htmlspecialchars) dilakukan di VIEW
-        // jadi data tidak ter-double-encode saat form dibuka ulang untuk diedit.
         $nama     = trim($data['nama'] ?? '');
         $email    = trim($data['email'] ?? '');
         $no_telp  = trim($data['no_telp'] ?? '');
         $tagline  = trim($data['tagline'] ?? '');
         $tentang  = trim($data['tentang'] ?? '');
 
-        // =========================
-        // VALIDASI INPUT
-        // =========================
-        if ($nama === '' || $email === '') {
-            return ['success' => false, 'error' => 'Nama dan email wajib diisi'];
-        }
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return ['success' => false, 'error' => 'Format email tidak valid'];
-        }
-
-        // Cegah email bentrok dengan akun lain
-        $this->db->query('SELECT id FROM users WHERE email = :email AND id != :id LIMIT 1');
-        $this->db->bind('email', $email);
-        $this->db->bind('id', $id);
-        if ($this->db->single()) {
-            return ['success' => false, 'error' => 'Email sudah digunakan akun lain'];
-        }
-
-        // =========================
-        // HANDLING UPLOAD GAMBAR
-        // =========================
         $gambarLama = $data['gambarLama'] ?? '';
-        
-        // Gunakan FileUploader untuk upload (ini mengembalikan string atau array error)
         $hasilUpload = $this->fileUploader->uploadProfil($files);
 
         if (is_array($hasilUpload)) {
-            // ['error' => pesan] -> gagal validasi/upload, jangan sentuh foto lama
             return ['success' => false, 'error' => $hasilUpload['error']];
         }
 
-        // string kosong '' = tidak ada file baru dikirim -> pertahankan foto lama
         $gambar = $hasilUpload === '' ? $gambarLama : $hasilUpload;
         $gambarBaruDiupload = $hasilUpload !== '';
 
-        // =========================
-        // UPDATE DATABASE
-        // =========================
         $query = "UPDATE users SET 
                     nama = :nama, 
                     email = :email, 
@@ -120,20 +83,12 @@ class User
         $this->db->bind('id', $id);
 
         if (!$this->db->execute()) {
-            // Rollback: hapus file yang sudah terlanjur diupload kalau query gagal
             if ($gambarBaruDiupload) {
                 $this->fileUploader->deleteFile($gambar, 'profile');
             }
             return ['success' => false, 'error' => 'Gagal menyimpan perubahan ke database'];
         }
 
-        // =========================
-        // CLEANUP: HAPUS FOTO LAMA
-        // =========================
-        // Hanya hapus foto lama jika:
-        // 1. Berhasil upload foto baru
-        // 2. Ada foto lama yang tersimpan
-        // 3. Foto lama bukan default.jpg
         if ($gambarBaruDiupload && !empty($gambarLama) && $gambarLama !== 'default.jpg') {
             $this->fileUploader->deleteFile($gambarLama, 'profile');
         }
