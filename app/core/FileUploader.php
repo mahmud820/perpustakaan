@@ -4,12 +4,14 @@ class FileUploader
 {
     private string $coverDir;
     private string $pdfDir;
+    private string $profileDir;
 
     public function __construct()
     {
         $root = dirname(__DIR__, 2);
         $this->coverDir = $root . '/public/img/dataGambar/';
         $this->pdfDir = $root . '/public/uploads/pdf/';
+        $this->profileDir = $root . '/public/img/profil/';
     }
 
     public function uploadCover(array $files): string|array
@@ -62,6 +64,70 @@ class FileUploader
                 },
             ]
         );
+    }
+
+    /**
+     * Upload profil gambar (untuk user profile picture)
+     * Return: string nama file baru, '' jika tidak ada file dikirim,
+     *         atau array ['error' => pesan] jika gagal validasi/upload.
+     */
+    public function uploadProfil(array $files): string|array
+    {
+        return $this->uploadFile(
+            $files['gambar'] ?? null,
+            [
+                'directory' => $this->profileDir,
+                'fieldName' => 'gambar',
+                'maxSize' => 2 * 1024 * 1024,
+                'allowedMimeTypes' => [
+                    'image/jpeg' => 'jpg',
+                    'image/png' => 'png',
+                    'image/webp' => 'webp',
+                ],
+                'errorMessage' => 'Format foto harus JPG, PNG, atau WEBP',
+                'sizeMessage' => 'Ukuran foto maksimal 2 MB',
+                'contentMessage' => 'File rusak atau bukan gambar yang valid',
+                'customValidator' => function ($tmpName) {
+                    return @getimagesize($tmpName) !== false;
+                },
+            ]
+        );
+    }
+
+    /**
+     * Hapus file dari disk
+     * Return: true jika berhasil, false jika file tidak ditemukan atau gagal
+     */
+    public function deleteFile(string $filename, string $type = 'profile'): bool
+    {
+        // Validasi input untuk mencegah directory traversal
+        if (strpos($filename, '/') !== false || strpos($filename, '\\') !== false) {
+            return false;
+        }
+
+        $directory = match ($type) {
+            'cover' => $this->coverDir,
+            'pdf' => $this->pdfDir,
+            'profile' => $this->profileDir,
+            default => null,
+        };
+
+        if ($directory === null) {
+            return false;
+        }
+
+        $filePath = $directory . $filename;
+
+        // Pastikan file ada dalam directory yang benar (tidak bisa keluar)
+        if (realpath($filePath) === false || strpos(realpath($filePath), realpath($directory)) !== 0) {
+            return false;
+        }
+
+        if (!file_exists($filePath)) {
+            return false;
+        }
+
+        return @unlink($filePath);
     }
 
     private function uploadFile(?array $file, array $config): string|array
