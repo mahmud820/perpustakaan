@@ -2,7 +2,6 @@
 
 class DaftarBuku extends Controller
 {
-    // Jumlah buku per halaman untuk pagination
     const PER_PAGE = 12;
 
     public function index()
@@ -12,48 +11,31 @@ class DaftarBuku extends Controller
         $keyword = trim($_GET['keyword'] ?? '');
         $klasifikasi = trim($_GET['klasifikasi'] ?? '');
 
-        // Batasi panjang input pencarian (mencegah query/keyword yang tidak wajar)
         $keyword = mb_substr($keyword, 0, 100);
         $klasifikasi = mb_substr($klasifikasi, 0, 100);
 
-        // Kirim ulang nilai filter agar tetap terisi di form setelah submit
         $data['keyword'] = $keyword;
         $data['klasifikasi_terpilih'] = $klasifikasi;
 
-        // =========================
-        // PAGINATION
-        // =========================
-        $page = (int) ($_GET['page'] ?? 1);
-        if ($page < 1) {
-            $page = 1;
-        }
-
-        $offset = ($page - 1) * self::PER_PAGE;
+        $page = max(1, (int) ($_GET['page'] ?? 1));
 
         $buku = $this->model('Buku');
         $adaFilter = ($keyword !== '' || $klasifikasi !== '');
 
-        // Hitung total dulu, SEBELUM offset dihitung
         $total = $adaFilter
             ? $buku->countCariBuku($keyword, $klasifikasi)
             : $buku->countAllBuku();
 
-        $totalPages = (int) max(1, ceil($total / self::PER_PAGE));
-
-        // Clamp $page ke totalPages SEBELUM offset dihitung & query dijalankan
-        if ($page > $totalPages) {
-            $page = $totalPages;
-        }
-
-        $offset = ($page - 1) * self::PER_PAGE;
+        $pagination = new Pagination($page, self::PER_PAGE, $total);
+        $page = $pagination->getPage();
+        $offset = $pagination->getOffset();
 
         $data['buku'] = $adaFilter
             ? $buku->cariBuku($keyword, $klasifikasi, self::PER_PAGE, $offset)
             : $buku->getAllBuku(self::PER_PAGE, $offset);
 
         $data['currentPage'] = $page;
-        $data['totalPages'] = $totalPages;
-
+        $data['totalPages'] = $pagination->getTotalPages();
         $data['daftarKlasifikasi'] = $buku->getAllKlasifikasi();
 
         $this->view('templates/header', $data);
@@ -63,7 +45,6 @@ class DaftarBuku extends Controller
 
     public function detail($id)
     {
-        // Validasi id harus numerik
         if (!ctype_digit((string) $id)) {
             http_response_code(404);
             $data['judul'] = 'Buku Tidak Ditemukan';
@@ -218,9 +199,7 @@ class DaftarBuku extends Controller
         }
 
         if (is_string($hasil)) {
-            $statusMap = [
-                'Buku tidak ditemukan' => 404,
-            ];
+            $statusMap = ['Buku tidak ditemukan' => 404];
             http_response_code($statusMap[$hasil] ?? 500);
             echo $hasil;
             return;
