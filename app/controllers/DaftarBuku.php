@@ -96,75 +96,36 @@ class DaftarBuku extends Controller
     {
         AuthMiddleware::requireAdmin();
 
-        // Pastikan hanya POST yang diperbolehkan
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo '405 Method Not Allowed';
             return;
         }
 
-        // =========================
-        // CSRF PROTECTION
-        // =========================
         Csrf::guard();
 
-        // Ambil dan bersihkan data
         $judul = trim($_POST['judul'] ?? '');
         $penulis = trim($_POST['penulis'] ?? '');
         $klasifikasi = trim($_POST['klasifikasi'] ?? '');
         $sinopsis = trim($_POST['sinopsis'] ?? '');
         $linkBaca = trim($_POST['link_baca'] ?? '');
 
-        // =========================
-        // INPUT VALIDATION
-        // =========================
-        if ($judul === '') {
-            http_response_code(422);
-            echo 'Judul buku wajib diisi';
-            return;
-        }
-        if ($penulis === '') {
-            http_response_code(422);
-            echo 'Penulis wajib diisi';
-            return;
-        }
+        $errors = [
+            'judul' => Validator::judul($judul),
+            'penulis' => Validator::penulis($penulis),
+            'klasifikasi' => Validator::klasifikasi($klasifikasi),
+            'sinopsis' => Validator::sinopsis($sinopsis),
+            'link_baca' => Validator::linkBaca($linkBaca),
+        ];
 
-        if (mb_strlen($judul) > 255) {
-            http_response_code(422);
-            echo 'Judul buku terlalu panjang';
-            return;
-        }
-        if (mb_strlen($penulis) > 255) {
-            http_response_code(422);
-            echo 'Nama penulis terlalu panjang';
-            return;
-        }
-        if (mb_strlen($klasifikasi) > 100) {
-            http_response_code(422);
-            echo 'Kategori terlalu panjang (maksimal 100 karakter)';
-            return;
-        }
-        if (mb_strlen($sinopsis) > 5000) {
-            http_response_code(422);
-            echo 'Sinopsis terlalu panjang (maksimal 5000 karakter)';
-            return;
-        }
-
-        // Validasi URL jika diisi
-        if ($linkBaca !== '') {
-            if (mb_strlen($linkBaca) > 2048) {
+        foreach ($errors as $error) {
+            if ($error !== null) {
                 http_response_code(422);
-                echo 'Link baca terlalu panjang';
-                return;
-            }
-            if (!filter_var($linkBaca, FILTER_VALIDATE_URL) || !preg_match('/^https?:\/\//i', $linkBaca)) {
-                http_response_code(422);
-                echo 'Link baca tidak valid (harus diawali http:// atau https://)';
+                echo $error;
                 return;
             }
         }
 
-        // Kirim data yang sudah divalidasi ke model
         $data = [
             'judul' => $judul,
             'penulis' => $penulis,
@@ -180,36 +141,28 @@ class DaftarBuku extends Controller
             return;
         }
 
-        // Error validasi upload (client's fault) -> 422
         if (is_array($hasil) && isset($hasil['code'], $hasil['error'])) {
             http_response_code($hasil['code']);
             echo $hasil['error'];
             return;
         }
 
-        // Kegagalan database / server -> 500
         http_response_code(500);
         echo is_string($hasil) ? $hasil : 'Terjadi kesalahan pada server';
     }
 
     public function update()
     {
-        // Hanya Admin yang boleh update buku
         AuthMiddleware::requireAdmin();
 
-        // Hanya POST yang diperbolehkan
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo '405 Method Not Allowed';
             return;
         }
 
-        // =========================
-        // CSRF PROTECTION
-        // =========================
         Csrf::guard();
 
-        // Ambil data dengan aman
         $id = trim($_POST['id'] ?? '');
         $judul = trim($_POST['judul'] ?? '');
         $penulis = trim($_POST['penulis'] ?? '');
@@ -218,68 +171,29 @@ class DaftarBuku extends Controller
         $linkBaca = trim($_POST['link_baca'] ?? '');
         $hapusFileBaca = !empty($_POST['hapus_file_baca']);
 
-        // =========================
-        // VALIDASI ID
-        // =========================
-        if ($id === '' || !ctype_digit($id)) {
+        $idError = Validator::requiredId($id);
+        if ($idError !== null) {
             http_response_code(400);
-            echo 'ID buku tidak valid';
+            echo $idError;
             return;
         }
 
-        // =========================
-        // INPUT VALIDATION
-        // =========================
-        if ($judul === '') {
-            http_response_code(422);
-            echo 'Judul buku wajib diisi';
-            return;
-        }
-        if ($penulis === '') {
-            http_response_code(422);
-            echo 'Penulis wajib diisi';
-            return;
-        }
-        if (mb_strlen($judul) > 255) {
-            http_response_code(422);
-            echo 'Judul buku terlalu panjang';
-            return;
-        }
-        if (mb_strlen($penulis) > 255) {
-            http_response_code(422);
-            echo 'Nama penulis terlalu panjang';
-            return;
-        }
-        if (mb_strlen($klasifikasi) > 100) {
-            http_response_code(422);
-            echo 'Kategori terlalu panjang (maksimal 100 karakter)';
-            return;
-        }
-        if (mb_strlen($sinopsis) > 5000) {
-            http_response_code(422);
-            echo 'Sinopsis terlalu panjang (maksimal 5000 karakter)';
-            return;
-        }
+        $errors = [
+            'judul' => Validator::judul($judul),
+            'penulis' => Validator::penulis($penulis),
+            'klasifikasi' => Validator::klasifikasi($klasifikasi),
+            'sinopsis' => Validator::sinopsis($sinopsis),
+            'link_baca' => Validator::linkBaca($linkBaca),
+        ];
 
-        // =========================
-        // VALIDASI LINK BACA
-        // =========================
-        if ($linkBaca !== '') {
-            if (mb_strlen($linkBaca) > 2048) {
+        foreach ($errors as $error) {
+            if ($error !== null) {
                 http_response_code(422);
-                echo 'Link baca terlalu panjang';
-                return;
-            }
-            if (!filter_var($linkBaca, FILTER_VALIDATE_URL) || !preg_match('/^https?:\/\//i', $linkBaca)) {
-                http_response_code(422);
-                echo 'Link baca tidak valid (harus diawali http:// atau https://)';
+                echo $error;
                 return;
             }
         }
 
-        // =========================
-        // DATA UNTUK MODEL
-        // =========================
         $data = [
             'id' => (int) $id,
             'judul' => $judul,
@@ -297,14 +211,12 @@ class DaftarBuku extends Controller
             return;
         }
 
-        // Error validasi dari model
         if (is_array($hasil) && isset($hasil['code'], $hasil['error'])) {
             http_response_code($hasil['code']);
             echo $hasil['error'];
             return;
         }
 
-        // NEW: tangani return value string dari model (pesan bisnis spesifik)
         if (is_string($hasil)) {
             $statusMap = [
                 'Buku tidak ditemukan' => 404,
@@ -314,7 +226,6 @@ class DaftarBuku extends Controller
             return;
         }
 
-        // Error tidak terduga
         http_response_code(500);
         echo 'Terjadi kesalahan pada server';
     }
@@ -333,9 +244,6 @@ class DaftarBuku extends Controller
             return;
         }
 
-        // =========================
-        // CSRF PROTECTION
-        // =========================
         if (!Csrf::verify()) {
             http_response_code(403);
             echo 'Sesi tidak valid atau kedaluwarsa (CSRF)';
@@ -343,15 +251,14 @@ class DaftarBuku extends Controller
         }
 
         $id = trim($_POST['id'] ?? '');
+        $idError = Validator::requiredId($id);
 
-        if ($id === '' || !ctype_digit($id)) {
+        if ($idError !== null) {
             http_response_code(400);
-            echo 'ID buku tidak valid';
+            echo $idError;
             return;
         }
 
-        // Nama file yang dihapus diambil ulang dari database di dalam model,
-        // BUKAN dari input client, agar tidak bisa dimanipulasi.
         $hasil = $this->model('Buku')->hapusBuku(['id' => (int) $id]);
 
         if ($hasil > 0) {
@@ -362,9 +269,6 @@ class DaftarBuku extends Controller
         }
     }
 
-    // =========================
-    // UPDATE STATUS BACA (Admin only, dipakai dari Dashboard Admin)
-    // =========================
     public function updateStatus()
     {
         AuthMiddleware::requireAdmin();
@@ -375,21 +279,19 @@ class DaftarBuku extends Controller
             return;
         }
 
-        // =========================
-        // CSRF PROTECTION
-        // =========================
         Csrf::guard();
 
         $id = trim($_POST['id'] ?? '');
         $status = trim($_POST['status_baca'] ?? '');
 
-        if ($id === '' || !ctype_digit($id)) {
+        $idError = Validator::requiredId($id);
+        if ($idError !== null) {
             http_response_code(400);
-            echo 'ID buku tidak valid';
+            echo $idError;
             return;
         }
 
-        if (!array_key_exists($status, Buku::STATUS_BACA)) {
+        if (!Validator::statusBaca($status)) {
             http_response_code(422);
             echo 'Status baca tidak valid';
             return;
@@ -405,9 +307,6 @@ class DaftarBuku extends Controller
         }
     }
 
-    // =========================
-    // UPDATE PROGRESS MEMBACA (Admin only)
-    // =========================
     public function updateProgress()
     {
         AuthMiddleware::requireAdmin();
@@ -418,18 +317,23 @@ class DaftarBuku extends Controller
             return;
         }
 
-        // =========================
-        // CSRF PROTECTION
-        // =========================
         Csrf::guard();
 
         $id = trim($_POST['id'] ?? '');
         $halamanDibaca = trim($_POST['halaman_dibaca'] ?? '0');
         $totalHalaman = trim($_POST['total_halaman'] ?? '');
 
-        if ($id === '' || !ctype_digit($id)) {
+        $idError = Validator::requiredId($id);
+        if ($idError !== null) {
             http_response_code(400);
-            echo 'ID buku tidak valid';
+            echo $idError;
+            return;
+        }
+
+        $progressError = Validator::progressBuku($halamanDibaca, $totalHalaman);
+        if ($progressError !== null) {
+            http_response_code(422);
+            echo $progressError;
             return;
         }
 
@@ -443,9 +347,6 @@ class DaftarBuku extends Controller
         }
     }
 
-    // =========================
-    // UPDATE CATATAN PRIBADI (Admin only, tidak ditampilkan ke Guest)
-    // =========================
     public function updateCatatan()
     {
         AuthMiddleware::requireAdmin();
@@ -456,23 +357,22 @@ class DaftarBuku extends Controller
             return;
         }
 
-        // =========================
-        // CSRF PROTECTION
-        // =========================
         Csrf::guard();
 
         $id = trim($_POST['id'] ?? '');
         $catatan = trim($_POST['catatan_pribadi'] ?? '');
 
-        if ($id === '' || !ctype_digit($id)) {
+        $idError = Validator::requiredId($id);
+        if ($idError !== null) {
             http_response_code(400);
-            echo 'ID buku tidak valid';
+            echo $idError;
             return;
         }
 
-        if (mb_strlen($catatan) > 2000) {
+        $catatanError = Validator::catatanPribadi($catatan);
+        if ($catatanError !== null) {
             http_response_code(422);
-            echo 'Catatan maksimal 2000 karakter';
+            echo $catatanError;
             return;
         }
 
