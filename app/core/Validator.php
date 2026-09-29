@@ -116,4 +116,113 @@ class Validator
 
         return null;
     }
+
+    public static function nama($nama): ?string
+    {
+        $nama = trim((string) $nama);
+
+        if ($nama === '') {
+            return 'Nama wajib diisi';
+        }
+
+        if (mb_strlen($nama) > 100) {
+            return 'Nama terlalu panjang (maksimal 100 karakter)';
+        }
+
+        return null;
+    }
+
+    public static function email($email): ?string
+    {
+        $email = trim((string) $email);
+
+        if ($email === '') {
+            return 'Email wajib diisi';
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return 'Format email tidak valid';
+        }
+
+        if (mb_strlen($email) > 255) {
+            return 'Email terlalu panjang';
+        }
+
+        return null;
+    }
+
+    public static function noTelp($noTelp): ?string
+    {
+        $noTelp = trim((string) $noTelp);
+
+        if ($noTelp === '') {
+            return null;
+        }
+
+        if (mb_strlen($noTelp) > 30) {
+            return 'Nomor telepon terlalu panjang';
+        }
+
+        if (!preg_match('/^[0-9+\-\s()]+$/', $noTelp)) {
+            return 'Nomor telepon hanya boleh berisi angka, +, -, spasi, atau tanda kurung';
+        }
+
+        return null;
+    }
+
+    public static function tagline($tagline): ?string
+    {
+        $tagline = trim((string) $tagline);
+
+        if (mb_strlen($tagline) > 150) {
+            return 'Tagline terlalu panjang (maksimal 150 karakter)';
+        }
+
+        return null;
+    }
+
+    public static function tentang($tentang): ?string
+    {
+        $tentang = trim((string) $tentang);
+
+        if (mb_strlen($tentang) > 2000) {
+            return 'Tentang saya terlalu panjang (maksimal 2000 karakter)';
+        }
+
+        return null;
+    }
+
+    public static function username($username): ?string
+    {
+        $username = trim((string) $username);
+
+        if ($username === '') {
+            return 'Username wajib diisi';
+        }
+
+        if (mb_strlen($username) > 50) {
+            return 'Username maksimal 50 karakter';
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $username)) {
+            return 'Username hanya boleh berisi huruf, angka, underscore, atau dash';
+        }
+
+        return null;
+    }
+
+    public static function password($password): ?string
+    {
+        $password = (string) $password;
+
+        if ($password === '') {
+            return 'Password wajib diisi';
+        }
+
+        if (mb_strlen($password) < 6) {
+            return 'Password minimal 6 karakter';
+        }
+
+        return null;
+    }
 }
