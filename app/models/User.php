@@ -3,12 +3,12 @@
 class User
 {
     private $db;
-    private $folderGambar;
+    private $fileUploader;
 
     public function __construct()
     {
         $this->db = new Database;
-        $this->folderGambar = dirname(__DIR__, 2) . '/public/img/profil/';
+        $this->fileUploader = new FileUploader();
     }
 
     public function getByUsername(string $username)
@@ -44,21 +44,27 @@ class User
         return $this->db->single();
     }
 
-    // Return: ['success' => true] jika berhasil,
+    // =========================
+    // UPDATE PROFIL USER
+    // Return: ['success' => true, 'gambar' => namaFileBaru] jika berhasil,
     //         atau ['success' => false, 'error' => pesan] jika gagal validasi.
+    // =========================
     public function updateProfileData($data, $files)
     {
         $id = $_SESSION['user_id'];
 
-        // Sanitasi ringan saja di sini (trim). Escaping untuk tampilan (htmlspecialchars)
-        // dilakukan di VIEW saat data ditampilkan, bukan saat disimpan ke DB,
-        // supaya data tidak ter-double-encode saat form dibuka ulang untuk diedit.
+        // Sanitasi ringan: trim saja di sini
+        // Escaping untuk tampilan (htmlspecialchars) dilakukan di VIEW
+        // jadi data tidak ter-double-encode saat form dibuka ulang untuk diedit.
         $nama     = trim($data['nama'] ?? '');
         $email    = trim($data['email'] ?? '');
         $no_telp  = trim($data['no_telp'] ?? '');
         $tagline  = trim($data['tagline'] ?? '');
         $tentang  = trim($data['tentang'] ?? '');
 
+        // =========================
+        // VALIDASI INPUT
+        // =========================
         if ($nama === '' || $email === '') {
             return ['success' => false, 'error' => 'Nama dan email wajib diisi'];
         }
@@ -75,9 +81,13 @@ class User
             return ['success' => false, 'error' => 'Email sudah digunakan akun lain'];
         }
 
-        // Handling Upload Gambar
+        // =========================
+        // HANDLING UPLOAD GAMBAR
+        // =========================
         $gambarLama = $data['gambarLama'] ?? '';
-        $hasilUpload = $this->uploadGambar($files['gambar'] ?? null);
+        
+        // Gunakan FileUploader untuk upload (ini mengembalikan string atau array error)
+        $hasilUpload = $this->fileUploader->uploadProfil($files);
 
         if (is_array($hasilUpload)) {
             // ['error' => pesan] -> gagal validasi/upload, jangan sentuh foto lama
@@ -88,6 +98,9 @@ class User
         $gambar = $hasilUpload === '' ? $gambarLama : $hasilUpload;
         $gambarBaruDiupload = $hasilUpload !== '';
 
+        // =========================
+        // UPDATE DATABASE
+        // =========================
         $query = "UPDATE users SET 
                     nama = :nama, 
                     email = :email, 
@@ -107,70 +120,24 @@ class User
         $this->db->bind('id', $id);
 
         if (!$this->db->execute()) {
-            // Rollback file yang sudah terlanjur diupload kalau query gagal
-            if ($gambarBaruDiupload && file_exists($this->folderGambar . $gambar)) {
-                unlink($this->folderGambar . $gambar);
+            // Rollback: hapus file yang sudah terlanjur diupload kalau query gagal
+            if ($gambarBaruDiupload) {
+                $this->fileUploader->deleteFile($gambar, 'profile');
             }
             return ['success' => false, 'error' => 'Gagal menyimpan perubahan ke database'];
         }
 
-        // Hapus foto lama dari disk kalau berhasil ganti foto baru
-        if ($gambarBaruDiupload && !empty($gambarLama) && $gambarLama !== 'default.jpg' && file_exists($this->folderGambar . $gambarLama)) {
-            unlink($this->folderGambar . $gambarLama);
+        // =========================
+        // CLEANUP: HAPUS FOTO LAMA
+        // =========================
+        // Hanya hapus foto lama jika:
+        // 1. Berhasil upload foto baru
+        // 2. Ada foto lama yang tersimpan
+        // 3. Foto lama bukan default.jpg
+        if ($gambarBaruDiupload && !empty($gambarLama) && $gambarLama !== 'default.jpg') {
+            $this->fileUploader->deleteFile($gambarLama, 'profile');
         }
 
         return ['success' => true, 'gambar' => $gambar];
-    }
-
-    // Return: string nama file baru, '' jika tidak ada file dikirim,
-    //         atau array ['error' => pesan] jika gagal validasi/upload.
-    private function uploadGambar($file)
-    {
-        if (empty($file) || $file['error'] === UPLOAD_ERR_NO_FILE) {
-            return '';
-        }
-
-        if ($file['error'] !== UPLOAD_ERR_OK) {
-            return ['error' => 'Upload foto gagal'];
-        }
-
-        $maxSize = 2 * 1024 * 1024; // 2 MB
-        if ($file['size'] > $maxSize) {
-            return ['error' => 'Ukuran foto maksimal 2 MB'];
-        }
-
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $file['tmp_name']);
-        finfo_close($finfo);
-
-        $allowedMimeTypes = [
-            'image/jpeg' => 'jpg',
-            'image/png'  => 'png',
-            'image/webp' => 'webp',
-        ];
-
-        if (!isset($allowedMimeTypes[$mimeType])) {
-            return ['error' => 'Format foto harus JPG, PNG, atau WEBP'];
-        }
-
-        // Pastikan file benar-benar bisa didekode sebagai gambar,
-        // bukan cuma file dengan MIME type yang "kelihatan" cocok (mis. polyglot file).
-        $imageInfo = @getimagesize($file['tmp_name']);
-        if ($imageInfo === false) {
-            return ['error' => 'File rusak atau bukan gambar yang valid'];
-        }
-
-        $extension = $allowedMimeTypes[$mimeType];
-        $namaFileBaru = bin2hex(random_bytes(16)) . '.' . $extension;
-
-        if (!is_dir($this->folderGambar) && !mkdir($this->folderGambar, 0755, true)) {
-            return ['error' => 'Folder foto tidak ditemukan'];
-        }
-
-        if (!move_uploaded_file($file['tmp_name'], $this->folderGambar . $namaFileBaru)) {
-            return ['error' => 'Foto gagal disimpan'];
-        }
-
-        return $namaFileBaru;
     }
 }
