@@ -1,5 +1,5 @@
-<main> 
- <!-- Halaman Beranda/Content -->
+<main>
+  <!-- Halaman Beranda/Content -->
   <div class="hero-donghua">
     <div class="container-fluid p-0">
       <div class="row g-0 m-0 w-100 flex-column flex-md-row">

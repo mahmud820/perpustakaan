@@ -173,11 +173,11 @@ document.querySelectorAll(".btn-delete").forEach((button) => {
 
       const hasil = await response.text();
 
-      if (hasil.trim() === "success") {
+      if (response.ok) {
         Swal.fire({
           icon: "success",
           title: "Berhasil",
-          text: "Buku berhasil dihapus",
+          text: hasil.trim() || "Buku berhasil dihapus",
           timer: 1500,
           showConfirmButton: false,
         }).then(() => {
@@ -187,7 +187,7 @@ document.querySelectorAll(".btn-delete").forEach((button) => {
         Swal.fire({
           icon: "error",
           title: "Gagal",
-          text: "Buku gagal dihapus",
+          text: hasil.trim() || "Buku gagal dihapus",
         });
       }
     } catch (error) {

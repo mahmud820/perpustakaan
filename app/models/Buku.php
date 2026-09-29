@@ -194,7 +194,10 @@ class Buku
         // =========================
         $cover = $this->uploadCover($files);
         if (is_array($cover)) {
-            return $cover['error'];
+            return [
+                'code' => 422,
+                'error' => $cover['error']
+            ];
         }
 
         // =========================
@@ -206,7 +209,10 @@ class Buku
             if ($cover !== '' && file_exists($this->folderCover . $cover)) {
                 unlink($this->folderCover . $cover);
             }
-            return $fileBaca['error'];
+            return [
+                'code' => 422,
+                'error' => $fileBaca['error']
+            ];
         }
 
         // =========================

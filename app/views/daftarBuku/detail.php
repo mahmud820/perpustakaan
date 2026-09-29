@@ -34,7 +34,7 @@ $persenProgress = ($totalHalaman && $totalHalaman > 0)
 
     <div class="overlay">
 
-        <div class="container py-5 mt-5">
+        <div class="container py-5">
 
             <div class="card border-0 shadow-lg bg-white bg-opacity-75">
 

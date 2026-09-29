@@ -1,10 +1,12 @@
 /* DAFTAR BUKU */
 .daftar-buku-section {
   position: relative;
-  min-height: 100vh;
+  min-height: calc(100vh - var(--navbar-height));
+  min-height: calc(100svh - var(--navbar-height));
   padding-top: 60px;
   padding-bottom: 40px;
-  background: url('../../img/background/background3.jpg') no-repeat center center;
+  background: url("../../img/background/background3.jpg") no-repeat center
+    center;
   background-size: cover;
 }
 
@@ -52,4 +54,70 @@
 
 .daftar-buku-section .card-text {
   flex-grow: 1;
+}
+
+/* =========================================
+   PAGINATION - CLEAN LIBRARY
+   Warm Gold & Cream
+========================================= */
+
+.library-pagination {
+  margin-top: 30px;
+}
+
+.library-pagination .page-item {
+  margin: 0 3px;
+}
+
+.library-pagination .page-link {
+  color: #6b6258;
+  background-color: #fffaf2;
+  border: 1px solid #e5d8c5;
+  border-radius: 10px;
+
+  padding: 8px 14px;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* Hover */
+.library-pagination .page-link:hover {
+  color: #4f463d;
+  background-color: #f3e4bd;
+  border-color: #d6b45c;
+
+  transform: translateY(-2px);
+}
+
+/* Halaman aktif */
+.library-pagination .page-item.active .page-link {
+  color: #ffffff;
+  background-color: #c9a227;
+  border-color: #c9a227;
+
+  font-weight: 600;
+
+  box-shadow: 0 3px 8px rgba(201, 162, 39, 0.25);
+}
+
+/* Disabled */
+.library-pagination .page-item.disabled .page-link {
+  color: #b8b0a5;
+  background-color: #f7f3ec;
+  border-color: #e8e1d7;
+
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Hilangkan outline Bootstrap ketika fokus */
+.library-pagination .page-link:focus {
+  box-shadow: 0 0 0 0.15rem rgba(201, 162, 39, 0.2);
 }

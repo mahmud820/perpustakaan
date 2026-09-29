@@ -1,32 +1,184 @@
-/* Navbar */
+/* ==========================================
+   NAVBAR DESIGN (Warm & Classic Aesthetic)
+   ========================================== */
+
+/* Container Utama Navbar */
 .custom-navbar {
-  background-color: rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(0.5px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  background: rgba(
+    15,
+    12,
+    10,
+    0.75
+  ); /* Dark warm overlay agar teks terbaca jelas */
+  backdrop-filter: blur(12px); /* Blur latar belakang gambar */
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   z-index: 999;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0.8rem 1.5rem;
 }
 
+.custom-navbar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ffd700, transparent);
+  box-shadow:
+    0 0 8px 2px rgba(255, 215, 0, 0.6),
+    0 0 18px 4px rgba(255, 215, 0, 0.3);
+}
+
+/* Brand / Logo */
+.brand-text {
+  font-family: "Georgia", "Playfair Display", serif; /* Font klasik premium */
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #f7e7ce; /* Warm Cream */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  transition: color 0.3s ease;
+}
+
+.brand-text:hover {
+  color: #ffd700;
+}
+
+/* Nav Link Items */
 .navbar .nav-link {
-  color: #fff;
+  color: rgba(255, 245, 235, 0.85);
   font-weight: 500;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+  margin: 0 6px;
+  padding: 6px 12px !important;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+/* Efek Hover Link (Garis Bawah Halus) */
+.navbar .nav-link::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  bottom: 0;
+  left: 50%;
+  background-color: #e5c158; /* Warm Gold */
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+  border-radius: 2px;
 }
 
 .navbar .nav-link:hover {
-  color: #0030ce;
+  color: #ffffff;
 }
 
-.brand-text {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: white;
+.navbar .nav-link:hover::after,
+.navbar .nav-item.active .nav-link::after {
+  width: 70%;
 }
 
+/* Styling Tombol Login (Pill Button) */
+.btn-login-nav {
+  background: rgba(229, 193, 88, 0.15) !important;
+  border: 1px solid rgba(229, 193, 88, 0.6) !important;
+  color: #f7e7ce !important;
+  border-radius: 20px;
+  padding: 6px 18px !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-login-nav:hover {
+  background: rgba(229, 193, 88, 0.9) !important;
+  color: #1a0f07 !important;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(229, 193, 88, 0.4);
+}
+
+.btn-login-nav::after {
+  display: none !important; /* Hapus garis bawah khusus tombol login */
+}
+
+/* Styling Status User/Logout */
+.user-greeting {
+  color: #e5c158 !important;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* Toggler / Hamburger Menu (Mobile View) */
 .navbar-toggler {
-  border-color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+}
+
+.navbar-toggler:focus {
+  box-shadow: none;
 }
 
 .navbar-toggler-icon {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23ffffff' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 1)' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 245, 235, 0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* ===== Dropdown Profil (avatar bulat + nama) ===== */
+.profile-dropdown .nav-link {
+  padding: 4px 10px !important;
+  border-radius: 30px;
+  transition: background-color 0.3s ease;
+}
+
+.profile-dropdown .nav-link:hover,
+.profile-dropdown .nav-link[aria-expanded="true"] {
+  background: rgba(229, 193, 88, 0.12);
+}
+
+.profile-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5c158;
+}
+
+.profile-dropdown .user-greeting {
+  color: #e5c158 !important;
+  font-style: italic;
+  font-size: 0.9rem;
+  padding: 0 !important;
+}
+
+.profile-dropdown .dropdown-toggle::after {
+  color: rgba(255, 245, 235, 0.85);
+  vertical-align: middle;
+}
+
+.profile-dropdown-menu {
+  background: #1a0f07;
+  border: 1px solid rgba(229, 193, 88, 0.4);
+  border-radius: 12px;
+  padding: 8px;
+  margin-top: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.profile-dropdown-menu .dropdown-item {
+  color: #f7e7ce;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.profile-dropdown-menu .dropdown-item:hover,
+.profile-dropdown-menu .dropdown-item:focus {
+  background: rgba(229, 193, 88, 0.15);
+  color: #ffd700;
+}
+
+.profile-dropdown-menu .dropdown-divider {
+  border-color: rgba(229, 193, 88, 0.25);
 }

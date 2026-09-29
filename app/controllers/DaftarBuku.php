@@ -27,24 +27,29 @@ class DaftarBuku extends Controller
         if ($page < 1) {
             $page = 1;
         }
+
         $offset = ($page - 1) * self::PER_PAGE;
 
         $buku = $this->model('Buku');
+        $adaFilter = ($keyword !== '' || $klasifikasi !== '');
 
-        if ($keyword !== '' || $klasifikasi !== '') {
-            $total = $buku->countCariBuku($keyword, $klasifikasi);
-            $data['buku'] = $buku->cariBuku($keyword, $klasifikasi, self::PER_PAGE, $offset);
-        } else {
-            $total = $buku->countAllBuku();
-            $data['buku'] = $buku->getAllBuku(self::PER_PAGE, $offset);
-        }
+        // Hitung total dulu, SEBELUM offset dihitung
+        $total = $adaFilter
+            ? $buku->countCariBuku($keyword, $klasifikasi)
+            : $buku->countAllBuku();
 
         $totalPages = (int) max(1, ceil($total / self::PER_PAGE));
 
-        // Jika halaman diminta melebihi total halaman, batasi ke halaman terakhir yang valid
+        // Clamp $page ke totalPages SEBELUM offset dihitung & query dijalankan
         if ($page > $totalPages) {
             $page = $totalPages;
         }
+
+        $offset = ($page - 1) * self::PER_PAGE;
+
+        $data['buku'] = $adaFilter
+            ? $buku->cariBuku($keyword, $klasifikasi, self::PER_PAGE, $offset)
+            : $buku->getAllBuku(self::PER_PAGE, $offset);
 
         $data['currentPage'] = $page;
         $data['totalPages'] = $totalPages;
@@ -172,10 +177,19 @@ class DaftarBuku extends Controller
 
         if ($hasil === true) {
             echo 'success';
-        } else {
-            http_response_code(500);
-            echo $hasil;
+            return;
         }
+
+        // Error validasi upload (client's fault) -> 422
+        if (is_array($hasil) && isset($hasil['code'], $hasil['error'])) {
+            http_response_code($hasil['code']);
+            echo $hasil['error'];
+            return;
+        }
+
+        // Kegagalan database / server -> 500
+        http_response_code(500);
+        echo is_string($hasil) ? $hasil : 'Terjadi kesalahan pada server';
     }
 
     public function update()
@@ -290,6 +304,16 @@ class DaftarBuku extends Controller
             return;
         }
 
+        // NEW: tangani return value string dari model (pesan bisnis spesifik)
+        if (is_string($hasil)) {
+            $statusMap = [
+                'Buku tidak ditemukan' => 404,
+            ];
+            http_response_code($statusMap[$hasil] ?? 500);
+            echo $hasil;
+            return;
+        }
+
         // Error tidak terduga
         http_response_code(500);
         echo 'Terjadi kesalahan pada server';
@@ -299,13 +323,13 @@ class DaftarBuku extends Controller
     {
         if (!AuthMiddleware::isAdmin()) {
             http_response_code(403);
-            echo 'failed';
+            echo 'Akses ditolak';
             return;
         }
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
-            echo 'failed';
+            echo 'Method tidak diizinkan';
             return;
         }
 
@@ -314,7 +338,7 @@ class DaftarBuku extends Controller
         // =========================
         if (!Csrf::verify()) {
             http_response_code(403);
-            echo 'failed';
+            echo 'Sesi tidak valid atau kedaluwarsa (CSRF)';
             return;
         }
 
@@ -322,7 +346,7 @@ class DaftarBuku extends Controller
 
         if ($id === '' || !ctype_digit($id)) {
             http_response_code(400);
-            echo 'failed';
+            echo 'ID buku tidak valid';
             return;
         }
 
@@ -331,10 +355,10 @@ class DaftarBuku extends Controller
         $hasil = $this->model('Buku')->hapusBuku(['id' => (int) $id]);
 
         if ($hasil > 0) {
-            echo 'success';
+            echo 'Buku berhasil dihapus';
         } else {
             http_response_code(404);
-            echo 'failed';
+            echo 'Buku tidak ditemukan';
         }
     }
 

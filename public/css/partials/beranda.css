@@ -3,7 +3,8 @@
   position: relative;
   background: url("../../img/background/Donghua.jpg") no-repeat center center;
   background-size: cover;
-  min-height: 100vh;
+  min-height: calc(100vh - var(--navbar-height));
+  min-height: calc(100svh - var(--navbar-height));
   padding-bottom: 0;
   color: white;
   overflow: hidden;

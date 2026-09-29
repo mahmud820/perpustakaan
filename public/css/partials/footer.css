@@ -1,73 +1,114 @@
+/* ==========================================
+   CUSTOM STYLING FOOTER (KONSISTEN DENGAN NAVBAR)
+   ========================================== */
+
 .footer {
-    margin-top: 0;
-    background: rgba(31, 41, 55, 0.95);
-    backdrop-filter: blur(5px);
-    color: #e5e7eb;
-    padding: 60px 0 20px;
-    border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: 0;
+  /* Latar belakang Glassmorphism gelap selaras dengan Navbar */
+  background: rgba(15, 20, 30, 0.75) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #e5e7eb;
+  padding: 50px 0 25px;
+  border-top: none;
+  position: relative;
+  z-index: 10;
+}
+
+.footer::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ffd700, transparent);
+  box-shadow:
+    0 0 8px 2px rgba(255, 215, 0, 0.6),
+    0 0 18px 4px rgba(255, 215, 0, 0.3);
 }
 
 .footer-title {
-    color: #fff;
-    font-weight: 700;
-    margin-bottom: 15px;
+  color: #ffffff;
+  font-family:
+    "Georgia", "Cinzel", serif; /* Font bergaya klasik selaras dengan brand navbar */
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .footer-subtitle {
-    color: #fff;
-    margin-bottom: 15px;
+  color: #ffd700; /* Warna aksen emas lembut */
+  font-weight: 600;
+  font-size: 1.15rem;
+  margin-bottom: 15px;
 }
 
-.footer-links {
-    list-style: none;
-    padding: 0;
+.footer-text {
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+  font-size: 0.95rem;
 }
 
-.footer-links li {
-    margin-bottom: 10px;
+/* Item Kontak */
+.contact-item {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  margin-bottom: 8px;
 }
 
-.footer-links a {
-    text-decoration: none;
-    color: #d1d5db;
-    transition: 0.3s;
+.contact-item i {
+  color: #ffd700; /* Warna ikon kontak emas */
 }
 
-.footer-links a:hover {
-    color: #0d6efd;
-    padding-left: 5px;
-}
-
+/* Social Media Icons */
 .social-icons {
-    margin-top: 15px;
+  display: flex;
+  gap: 12px;
+  margin-top: 15px;
 }
 
 .social-icons a {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-
-    width: 40px;
-    height: 40px;
-
-    margin-right: 10px;
-
-    background: rgba(255,255,255,0.1);
-    color: white;
-
-    border-radius: 50%;
-
-    text-decoration: none;
-    transition: 0.3s;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  color: #ffd700;
+  border-radius: 50%;
+  text-decoration: none;
+  transition: all 0.3s ease;
 }
 
 .social-icons a:hover {
-    background: #0d6efd;
-    transform: translateY(-3px);
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  color: #111;
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+  border-color: transparent;
 }
 
+/* Garis Pemisah (Pembatas Emas) */
+.footer-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 215, 0, 0.4),
+    transparent
+  );
+  margin: 30px 0 20px 0;
+}
+
+/* Copyright Text */
 .footer-bottom {
-    text-align: center;
-    color: #9ca3af;
-    margin-top: 20px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
 }

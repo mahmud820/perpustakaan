@@ -19,7 +19,6 @@ class Admin extends Controller
         if ($page < 1) {
             $page = 1;
         }
-        $offset = ($page - 1) * self::PER_PAGE;
 
         $buku = $this->model('Buku');
 
@@ -29,6 +28,8 @@ class Admin extends Controller
         if ($page > $totalPages) {
             $page = $totalPages;
         }
+
+        $offset = ($page - 1) * self::PER_PAGE;
 
         $data['buku'] = $buku->getAllBuku(self::PER_PAGE, $offset);
         $data['currentPage'] = $page;

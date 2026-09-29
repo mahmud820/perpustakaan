@@ -62,17 +62,14 @@ class AuthMiddleware
         $_SESSION['nama'] = $user['nama'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['role'] = $user['role'];
+        $_SESSION['gambar'] = $user['gambar'] ?? null;
         $_SESSION['last_activity'] = time();
         $_SESSION['last_regenerate'] = time();
-
-        // Ikat sesi ke User-Agent kasar (mitigasi sebagian session hijacking,
-        // tanpa mengikat ke IP karena IP pengguna mobile/proxy bisa wajar berubah-ubah)
-        $_SESSION['ua_hash'] = self::userAgentHash();
     }
 
     private static function enforceIdleTimeout(): void
     {
-        if (self::isIdleExpired() || !self::isSameUserAgent()) {
+        if (self::isIdleExpired()) {
             self::destroySession();
             header('Location: ' . BASEURL . '/auth/login');
             exit;
@@ -95,28 +92,12 @@ class AuthMiddleware
         return (time() - $lastActivity) > self::IDLE_TIMEOUT;
     }
 
-    private static function isSameUserAgent(): bool
-    {
-        if (empty($_SESSION['ua_hash'])) {
-            // Sesi lama sebelum fitur ini ada, catat sekarang dan lanjutkan
-            $_SESSION['ua_hash'] = self::userAgentHash();
-            return true;
-        }
-
-        return hash_equals($_SESSION['ua_hash'], self::userAgentHash());
-    }
-
-    private static function userAgentHash(): string
-    {
-        return hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? '');
-    }
-
     private static function regenerateIdPeriodically(): void
     {
         $lastRegenerate = $_SESSION['last_regenerate'] ?? time();
 
         if ((time() - $lastRegenerate) > self::REGENERATE_INTERVAL) {
-            session_regenerate_id(true);
+            session_regenerate_id(false);
             $_SESSION['last_regenerate'] = time();
         }
     }

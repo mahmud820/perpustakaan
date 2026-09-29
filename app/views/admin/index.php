@@ -1,65 +1,58 @@
 <?php
 
 /** @var array $data */
-
 ?>
-<section class="py-5" style="margin-top: 80px; min-height: 70vh;">
+
+<section class="admin-fullscreen">
     <div class="container">
 
-        <div class="card shadow-sm mb-4">
+        <!-- Header Card -->
+        <div class="card mb-4">
             <div class="card-body p-4">
-                <h1 class="h3 mb-3">Halaman Admin</h1>
-                <p class="mb-1">Selamat datang, <strong><?= htmlspecialchars($_SESSION['nama']); ?></strong>.</p>
-                <p class="text-muted mb-0">Halaman ini hanya dapat diakses oleh user dengan role <strong>admin</strong>.</p>
+                <h1 class="h3 fw-bold mb-2">Halaman Admin</h1>
+                <p class="mb-1 text-dark">Selamat datang, <strong><?= htmlspecialchars($_SESSION['nama'] ?? 'Admin'); ?></strong>.</p>
+                <p class="text-muted small mb-0">Halaman ini hanya dapat diakses oleh user dengan role <strong>admin</strong>.</p>
             </div>
         </div>
 
         <?php $stats = $data['stats'] ?? ['total' => 0, 'sedang_dibaca' => 0, 'selesai_dibaca' => 0, 'belum_dibaca' => 0, 'terbaru' => []]; ?>
 
-        <!-- =========================
-             KARTU STATISTIK DASHBOARD
-             ========================= -->
+        <!-- Kartu Statistik Dashboard -->
         <div class="row g-3 mb-4">
             <div class="col-6 col-lg-3">
-                <div class="card shadow-sm h-100 border-0 bg-primary bg-opacity-10">
-                    <div class="card-body p-3">
-                        <div class="text-muted small mb-1">Total Buku</div>
-                        <div class="h3 mb-0 text-primary"><?= (int) $stats['total']; ?></div>
-                    </div>
+                <div class="stat-card bg-stat-blue">
+                    <div class="stat-icon"><i class="bi bi-book"></i></div>
+                    <div class="small fw-medium">Total Buku</div>
+                    <div class="h2 fw-bold mb-0"><?= (int) $stats['total']; ?></div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
-                <div class="card shadow-sm h-100 border-0 bg-warning bg-opacity-10">
-                    <div class="card-body p-3">
-                        <div class="text-muted small mb-1">Sedang Dibaca</div>
-                        <div class="h3 mb-0 text-warning-emphasis"><?= (int) $stats['sedang_dibaca']; ?></div>
-                    </div>
+                <div class="stat-card bg-stat-yellow">
+                    <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+                    <div class="small fw-medium">Sedang Dibaca</div>
+                    <div class="h2 fw-bold mb-0"><?= (int) $stats['sedang_dibaca']; ?></div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
-                <div class="card shadow-sm h-100 border-0 bg-success bg-opacity-10">
-                    <div class="card-body p-3">
-                        <div class="text-muted small mb-1">Selesai Dibaca</div>
-                        <div class="h3 mb-0 text-success"><?= (int) $stats['selesai_dibaca']; ?></div>
-                    </div>
+                <div class="stat-card bg-stat-green">
+                    <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+                    <div class="small fw-medium">Selesai Dibaca</div>
+                    <div class="h2 fw-bold mb-0"><?= (int) $stats['selesai_dibaca']; ?></div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
-                <div class="card shadow-sm h-100 border-0 bg-secondary bg-opacity-10">
-                    <div class="card-body p-3">
-                        <div class="text-muted small mb-1">Belum Dibaca</div>
-                        <div class="h3 mb-0 text-secondary"><?= (int) $stats['belum_dibaca']; ?></div>
-                    </div>
+                <div class="stat-card bg-stat-gray">
+                    <div class="stat-icon"><i class="bi bi-eye"></i></div>
+                    <div class="small fw-medium">Belum Dibaca</div>
+                    <div class="h2 fw-bold mb-0"><?= (int) $stats['belum_dibaca']; ?></div>
                 </div>
             </div>
         </div>
 
-        <!-- =========================
-             WIDGET BUKU TERBARU
-             ========================= -->
-        <div class="card shadow-sm mb-4">
+        <!-- Widget Buku Terbaru -->
+        <div class="card mb-4">
             <div class="card-body p-4">
-                <h2 class="h5 mb-3">Buku Terbaru</h2>
+                <h2 class="h5 fw-bold mb-3">Buku Terbaru</h2>
 
                 <?php if (!empty($stats['terbaru'])) : ?>
                     <div class="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-3">
@@ -71,23 +64,23 @@
                             $statusTerbaru = $b['status_baca'] ?? 'belum_dibaca';
                             $statusLabelTerbaru = Buku::STATUS_BACA[$statusTerbaru] ?? 'Belum Dibaca';
                             $statusBadgeTerbaru = [
-                                'belum_dibaca'   => 'bg-secondary',
+                                'belum_dibaca'   => 'bg-secondary text-white',
                                 'sedang_dibaca'  => 'bg-warning text-dark',
-                                'selesai_dibaca' => 'bg-success',
-                            ][$statusTerbaru] ?? 'bg-secondary';
+                                'selesai_dibaca' => 'bg-success text-white',
+                            ][$statusTerbaru] ?? 'bg-secondary text-white';
                             ?>
-                            <div class="col">
-                                <a href="<?= BASEURL; ?>/daftarBuku/detail/<?= (int) $b['id']; ?>" class="text-decoration-none text-body">
-                                    <div class="ratio ratio-2x3 mb-1">
+                            <div class="col text-center">
+                                <a href="<?= BASEURL; ?>/daftarBuku/detail/<?= (int) $b['id']; ?>" class="text-decoration-none text-body d-block">
+                                    <div class="ratio ratio-2x3 mb-2 shadow-sm rounded overflow-hidden">
                                         <img src="<?= $coverTerbaru; ?>"
                                             alt=""
-                                            style="object-fit: cover; border-radius: 4px;"
+                                            style="object-fit: cover;"
                                             onerror="this.onerror=null;this.src='<?= BASEURL; ?>/img/no-image.png';">
                                     </div>
-                                    <div class="small fw-semibold text-truncate" title="<?= htmlspecialchars((string) $b['judul']); ?>">
+                                    <div class="small fw-bold text-truncate mb-1" title="<?= htmlspecialchars((string) $b['judul']); ?>">
                                         <?= htmlspecialchars((string) $b['judul']); ?>
                                     </div>
-                                    <span class="badge <?= $statusBadgeTerbaru; ?>"><?= htmlspecialchars($statusLabelTerbaru); ?></span>
+                                    <span class="badge badge-pill-custom <?= $statusBadgeTerbaru; ?>"><?= htmlspecialchars($statusLabelTerbaru); ?></span>
                                 </a>
                             </div>
                         <?php endforeach; ?>
@@ -98,30 +91,30 @@
             </div>
         </div>
 
-        <div class="card shadow-sm">
+        <!-- Tabel Kelola Buku -->
+        <div class="card">
             <div class="card-body p-4">
 
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
-                    <h2 class="h5 mb-0">Kelola Buku &mdash; Status Baca, Progress &amp; Catatan</h2>
-                    <a href="<?= BASEURL; ?>/daftarBuku" class="btn btn-sm btn-outline-primary">
-                        + Tambah / Edit / Hapus Buku
+                    <h2 class="h5 fw-bold mb-0">Kelola Buku &mdash; Status Baca, Progress &amp; Catatan</h2>
+                    <a href="<?= BASEURL; ?>/daftarBuku" class="btn btn-sm btn-primary rounded-pill px-3">
+                        <i class="bi bi-plus-lg me-1"></i> Tambah / Edit / Hapus Buku
                     </a>
                 </div>
 
-                <p class="text-muted small">
-                    Status baca dan progress bersifat global (ditandai oleh Admin), bukan per akun pembaca.
-                    Catatan pribadi hanya terlihat di halaman ini, tidak ditampilkan ke pengunjung.
+                <p class="text-muted small mb-4">
+                    <i class="bi bi-info-circle me-1"></i> Status baca dan progress bersifat global (ditandai oleh Admin), bukan per akun pembaca. Catatan pribadi hanya terlihat di halaman ini.
                 </p>
 
                 <div class="table-responsive">
                     <table class="table align-middle admin-buku-table">
-                        <thead class="table-light">
+                        <thead>
                             <tr>
                                 <th style="width: 60px;">Cover</th>
                                 <th>Judul / Penulis</th>
-                                <th style="width: 190px;">Status Baca</th>
+                                <th style="width: 170px;">Status Baca</th>
                                 <th style="width: 220px;">Progress Membaca</th>
-                                <th style="width: 140px;">Catatan Pribadi</th>
+                                <th style="width: 140px;" class="text-end">Catatan Pribadi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -131,9 +124,13 @@
                                     $cover = !empty($buku['cover'])
                                         ? BASEURL . '/img/dataGambar/' . rawurlencode($buku['cover'])
                                         : BASEURL . '/img/no-image.png';
-                                    $totalHalaman = $buku['total_halaman'] ?? '';
+                                    $totalHalaman = (int) ($buku['total_halaman'] ?? 0);
                                     $halamanDibaca = (int) ($buku['halaman_dibaca'] ?? 0);
                                     $catatan = $buku['catatan_pribadi'] ?? '';
+
+                                    // Hitung persen progress
+                                    $percent = ($totalHalaman > 0) ? min(100, round(($halamanDibaca / $totalHalaman) * 100)) : 0;
+                                    $statusCurrent = $buku['status_baca'] ?? 'belum_dibaca';
                                     ?>
                                     <tr data-id="<?= (int) $buku['id']; ?>">
                                         <td>
@@ -141,39 +138,46 @@
                                                 alt=""
                                                 width="45"
                                                 height="60"
-                                                style="object-fit: cover; border-radius: 4px;"
+                                                class="rounded shadow-sm"
+                                                style="object-fit: cover;"
                                                 onerror="this.onerror=null;this.src='<?= BASEURL; ?>/img/no-image.png';">
                                         </td>
                                         <td>
-                                            <div class="fw-semibold"><?= htmlspecialchars((string) $buku['judul']); ?></div>
+                                            <div class="fw-bold text-dark"><?= htmlspecialchars((string) $buku['judul']); ?></div>
                                             <div class="text-muted small"><?= htmlspecialchars((string) $buku['penulis']); ?></div>
                                         </td>
                                         <td>
-                                            <select class="form-select form-select-sm status-baca-select" data-id="<?= (int) $buku['id']; ?>">
+                                            <select class="form-select form-select-sm status-baca-select" data-id="<?= (int) $buku['id']; ?>" data-status="<?= $statusCurrent; ?>">
                                                 <?php foreach ($data['statusBacaOptions'] as $value => $label) : ?>
-                                                    <option value="<?= $value; ?>" <?= ($buku['status_baca'] ?? 'belum_dibaca') === $value ? 'selected' : ''; ?>>
+                                                    <option value="<?= $value; ?>" <?= $statusCurrent === $value ? 'selected' : ''; ?>>
                                                         <?= htmlspecialchars($label); ?>
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </td>
                                         <td>
-                                            <form class="progress-form d-flex align-items-center gap-1" data-id="<?= (int) $buku['id']; ?>">
-                                                <input type="number" min="0" class="form-control form-control-sm halaman-dibaca-input"
-                                                    style="width: 70px;" value="<?= $halamanDibaca; ?>" placeholder="Hlm" title="Halaman dibaca">
-                                                <span class="text-muted">/</span>
-                                                <input type="number" min="0" class="form-control form-control-sm total-halaman-input"
-                                                    style="width: 70px;" value="<?= htmlspecialchars((string) $totalHalaman); ?>" placeholder="Total" title="Total halaman">
-                                                <button type="submit" class="btn btn-sm btn-outline-primary">Simpan</button>
+                                            <form class="progress-form d-flex flex-column gap-1" data-id="<?= (int) $buku['id']; ?>">
+                                                <div class="d-flex align-items-center gap-1 mb-1">
+                                                    <input type="number" min="0" class="form-control form-control-sm halaman-dibaca-input border-0 bg-light fw-bold"
+                                                        style="width: 55px;" value="<?= $halamanDibaca; ?>" placeholder="Hlm">
+                                                    <span class="text-muted small">/</span>
+                                                    <input type="number" min="0" class="form-control form-control-sm total-halaman-input border-0 bg-light text-muted"
+                                                        style="width: 55px;" value="<?= $totalHalaman ?: ''; ?>" placeholder="Total">
+                                                    <button type="submit" class="btn btn-sm btn-light border-0 ms-auto" title="Simpan"><i class="bi bi-check-lg"></i></button>
+                                                </div>
+                                                <div class="custom-progress-bar">
+                                                    <div class="custom-progress-fill" style="width: <?= $percent; ?>%;"></div>
+                                                </div>
                                             </form>
                                         </td>
-                                        <td>
+                                        <td class="text-end">
                                             <button type="button"
-                                                class="btn btn-sm btn-outline-secondary btn-catatan"
+                                                class="btn btn-sm <?= $catatan !== '' ? 'btn-outline-primary' : 'btn-light text-primary'; ?> rounded-pill px-3 btn-catatan"
                                                 data-id="<?= (int) $buku['id']; ?>"
                                                 data-judul="<?= htmlspecialchars((string) $buku['judul']); ?>"
                                                 data-catatan="<?= htmlspecialchars((string) $catatan); ?>">
-                                                <?= $catatan !== '' ? '📝 Lihat/Edit' : '+ Tambah'; ?>
+                                                <i class="bi <?= $catatan !== '' ? 'bi-pencil-square' : 'bi-plus'; ?> me-1"></i>
+                                                <?= $catatan !== '' ? 'Lihat/Edit' : 'Tambah'; ?>
                                             </button>
                                         </td>
                                     </tr>
@@ -188,24 +192,43 @@
                 </div>
 
                 <?php if (($data['totalPages'] ?? 1) > 1) : ?>
-                    <nav aria-label="Navigasi halaman kelola buku" class="mt-3">
-                        <ul class="pagination justify-content-center flex-wrap">
+                    <nav aria-label="Navigasi halaman kelola buku" class="mt-4">
+
+                        <ul class="pagination admin-pagination pagination-sm justify-content-center flex-wrap gap-1">
 
                             <li class="page-item <?= $data['currentPage'] <= 1 ? 'disabled' : ''; ?>">
-                                <a class="page-link" href="<?= BASEURL; ?>/admin?page=<?= max(1, $data['currentPage'] - 1); ?>">&laquo;</a>
+
+                                <a class="page-link rounded-circle border-0"
+                                    href="<?= BASEURL; ?>/admin?page=<?= max(1, $data['currentPage'] - 1); ?>">
+                                    &lsaquo;
+                                </a>
+
                             </li>
 
                             <?php for ($i = 1; $i <= $data['totalPages']; $i++) : ?>
+
                                 <li class="page-item <?= $i === $data['currentPage'] ? 'active' : ''; ?>">
-                                    <a class="page-link" href="<?= BASEURL; ?>/admin?page=<?= $i; ?>"><?= $i; ?></a>
+
+                                    <a class="page-link rounded-circle border-0"
+                                        href="<?= BASEURL; ?>/admin?page=<?= $i; ?>">
+                                        <?= $i; ?>
+                                    </a>
+
                                 </li>
+
                             <?php endfor; ?>
 
                             <li class="page-item <?= $data['currentPage'] >= $data['totalPages'] ? 'disabled' : ''; ?>">
-                                <a class="page-link" href="<?= BASEURL; ?>/admin?page=<?= min($data['totalPages'], $data['currentPage'] + 1); ?>">&raquo;</a>
+
+                                <a class="page-link rounded-circle border-0"
+                                    href="<?= BASEURL; ?>/admin?page=<?= min($data['totalPages'], $data['currentPage'] + 1); ?>">
+                                    &rsaquo;
+                                </a>
+
                             </li>
 
                         </ul>
+
                     </nav>
                 <?php endif; ?>
 
@@ -217,26 +240,26 @@
 
 <!-- Modal Catatan Pribadi -->
 <div class="modal fade" id="catatanModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
             <form id="catatanForm">
                 <?= Csrf::field(); ?>
                 <input type="hidden" name="id" id="catatan_id">
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Catatan Pribadi &mdash; <span id="catatan_judul"></span></h5>
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Catatan Pribadi &mdash; <span id="catatan_judul"></span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
-                    <textarea name="catatan_pribadi" id="catatan_pribadi" class="form-control" rows="6"
-                        maxlength="2000" placeholder="Catatan ini hanya terlihat oleh Admin..."></textarea>
-                    <small class="text-muted">Maksimal 2000 karakter.</small>
+                    <textarea name="catatan_pribadi" id="catatan_pribadi" class="form-control bg-light border-0" rows="6"
+                        maxlength="2000" style="border-radius: 12px;" placeholder="Catatan ini hanya terlihat oleh Admin..."></textarea>
+                    <small class="text-muted mt-2 d-block">Maksimal 2000 karakter.</small>
                 </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-success">Simpan Catatan</button>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Simpan Catatan</button>
                 </div>
             </form>
         </div>

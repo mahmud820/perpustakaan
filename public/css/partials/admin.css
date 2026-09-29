@@ -1,10 +1,183 @@
-/* DASHBOARD ADMIN */
-.admin-buku-table td,
-.admin-buku-table th {
-  vertical-align: middle;
+/* Container & Background Override */
+.admin-fullscreen {
+  position: relative;
+  min-height: calc(100vh - var(--navbar-height));
+  min-height: calc(100svh - var(--navbar-height));
+  background: url("../../img/background/admin.jpg") no-repeat center center
+    fixed;
+  background-size: cover;
+  padding: 100px 20px 60px;
 }
 
-.admin-buku-table .halaman-dibaca-input,
-.admin-buku-table .total-halaman-input {
-  text-align: center;
+.admin-fullscreen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(
+    0,
+    0,
+    0,
+    0.25
+  ); /* Overlay lebih soft agar background menyatu */
+  z-index: 0;
+}
+
+.admin-fullscreen > .container {
+  position: relative;
+  z-index: 1;
+  max-width: 1000px;
+}
+
+/* Card Modern Style */
+.admin-fullscreen .card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+  background: #ffffff;
+}
+
+/* Kartu Statistik dengan Icon */
+.stat-card {
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  transition: transform 0.2s ease;
+}
+
+.stat-card .stat-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Custom Color Schemes for Stats */
+.bg-stat-blue {
+  background-color: #eef2ff;
+  color: #3b82f6;
+}
+.bg-stat-blue .stat-icon {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.bg-stat-yellow {
+  background-color: #fffbeb;
+  color: #d97706;
+}
+.bg-stat-yellow .stat-icon {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.bg-stat-green {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+.bg-stat-green .stat-icon {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.bg-stat-gray {
+  background-color: #f8fafc;
+  color: #475569;
+}
+.bg-stat-gray .stat-icon {
+  background-color: #e2e8f0;
+  color: #475569;
+}
+
+/* Custom Badge Status Select & Pills */
+.badge-pill-custom {
+  border-radius: 50rem;
+  padding: 0.4em 0.8em;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-baca-select {
+  border-radius: 50rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: 1px solid transparent;
+}
+.status-baca-select[data-status="belum_dibaca"] {
+  background-color: #e2e8f0;
+  color: #334155;
+}
+.status-baca-select[data-status="sedang_dibaca"] {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+.status-baca-select[data-status="selesai_dibaca"] {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+/* Progress Bar Visual */
+.progress-container {
+  min-width: 140px;
+}
+.custom-progress-bar {
+  height: 6px;
+  background-color: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.custom-progress-fill {
+  height: 100%;
+  background-color: #2563eb;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+/* Table Styling */
+.admin-buku-table th {
+  border-bottom: 2px solid #f1f5f9;
+  color: #64748b;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.admin-buku-table td {
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid #f8fafc;
+}
+
+/* =========================================
+   PAGINATION ADMIN
+   Warm Gold & Cream
+========================================= */
+
+.admin-pagination {
+  margin-top: 30px;
+}
+
+.admin-pagination .page-link {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  color: #6b6258;
+  background-color: #fffaf2;
+
+  border: 1px solid #e5d8c5 !important;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }

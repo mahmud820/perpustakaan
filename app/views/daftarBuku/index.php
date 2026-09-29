@@ -209,20 +209,31 @@
             };
             ?>
             <nav aria-label="Navigasi halaman daftar buku" class="mt-4">
-                <ul class="pagination justify-content-center flex-wrap">
+                <ul class="pagination library-pagination justify-content-center flex-wrap">
 
                     <li class="page-item <?= $data['currentPage'] <= 1 ? 'disabled' : ''; ?>">
-                        <a class="page-link" href="<?= $buatUrlHalaman(max(1, $data['currentPage'] - 1)); ?>">&laquo; Sebelumnya</a>
+                        <a class="page-link"
+                            href="<?= $buatUrlHalaman(max(1, $data['currentPage'] - 1)); ?>">
+                            &laquo; Sebelumnya
+                        </a>
                     </li>
 
                     <?php for ($i = 1; $i <= $data['totalPages']; $i++) : ?>
+
                         <li class="page-item <?= $i === $data['currentPage'] ? 'active' : ''; ?>">
-                            <a class="page-link" href="<?= $buatUrlHalaman($i); ?>"><?= $i; ?></a>
+                            <a class="page-link"
+                                href="<?= $buatUrlHalaman($i); ?>">
+                                <?= $i; ?>
+                            </a>
                         </li>
+
                     <?php endfor; ?>
 
                     <li class="page-item <?= $data['currentPage'] >= $data['totalPages'] ? 'disabled' : ''; ?>">
-                        <a class="page-link" href="<?= $buatUrlHalaman(min($data['totalPages'], $data['currentPage'] + 1)); ?>">Selanjutnya &raquo;</a>
+                        <a class="page-link"
+                            href="<?= $buatUrlHalaman(min($data['totalPages'], $data['currentPage'] + 1)); ?>">
+                            Selanjutnya &raquo;
+                        </a>
                     </li>
 
                 </ul>

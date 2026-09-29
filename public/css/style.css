@@ -6,8 +6,13 @@
 @import url("partials/about.css");
 @import url("partials/detail.css");
 @import url("partials/admin.css");
+@import url("partials/profile.css");
 
 /* Reset dasar */
+:root {
+  --navbar-height: 80px; /* tinggi navbar fixed-top, dipakai semua section fullscreen */
+}
+
 html,
 body {
   width: 100%;
@@ -22,6 +27,9 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  padding-top: var(
+    --navbar-height
+  ); /* dorong semua konten ke bawah navbar fixed-top, sekali untuk semua halaman */
 }
 
 /* Konten utama */

@@ -1,9 +1,11 @@
 /* Kontak */
 .contact-fullscreen {
-  min-height: 100vh;
-  background: url("../../img/background/background1.jpg") no-repeat center center;
+  min-height: calc(100vh - var(--navbar-height));
+  min-height: calc(100svh - var(--navbar-height));
+  background: url("../../img/background/background1.jpg") no-repeat center
+    center;
   background-size: cover;
-  padding-top: 60px;
+  padding-top: 40px;
   padding-bottom: 40px;
   color: #fff;
 }
@@ -13,12 +15,15 @@
 }
 
 .info-box {
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(26, 15, 7, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(229, 193, 88, 0.4);
   color: #fff;
   transition: all 0.3s ease;
 }
 
 .info-box:hover {
   transform: translateY(-5px);
+  border-color: rgba(229, 193, 88, 0.7);
 }

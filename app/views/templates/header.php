@@ -16,15 +16,15 @@
 
 <body>
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg fixed-top p-2 custom-navbar">
-    <div class="container-fluid">
+  <nav class="navbar navbar-expand-lg fixed-top custom-navbar">
+    <div class="container">
 
       <a class="navbar-brand d-flex align-items-center" href="<?= BASEURL; ?>">
         <img src="<?= BASEURL; ?>/img/perpus.png"
           alt="Logo"
-          width="50"
-          height="50"
-          class="me-2 rounded-circle flame-logo">
+          width="42"
+          height="42"
+          class="me-2 rounded-circle">
 
         <span class="brand-text">Perpustakaan</span>
       </a>
@@ -32,14 +32,15 @@
       <button class="navbar-toggler"
         type="button"
         data-bs-toggle="collapse"
-        data-bs-target="#navbarNav">
-
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse" id="navbarNav">
-
-        <ul class="navbar-nav ms-auto">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
 
           <li class="nav-item">
             <a class="nav-link" href="<?= BASEURL; ?>/beranda">Beranda</a>
@@ -64,21 +65,33 @@
           <?php endif; ?>
 
           <?php if (AuthMiddleware::isLogin()) : ?>
-            <li class="nav-item">
-              <span class="nav-link">
-                Halo, <?= htmlspecialchars($_SESSION['nama'] ?? ''); ?>
-              </span>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="<?= BASEURL; ?>/auth/logout">Logout</a>
+            <?php
+            $fotoProfil = !empty($_SESSION['gambar'])
+              ? BASEURL . '/img/profil/' . htmlspecialchars($_SESSION['gambar'])
+              : BASEURL . '/img/default.png';
+            ?>
+            <li class="nav-item dropdown profile-dropdown ms-lg-2">
+              <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="<?= $fotoProfil; ?>" alt="Foto Profil" class="profile-avatar">
+                <span class="user-greeting mb-0">Halo, <?= htmlspecialchars($_SESSION['nama'] ?? ''); ?></span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end profile-dropdown-menu" aria-labelledby="profileDropdown">
+                <?php if (AuthMiddleware::isAdmin()) : ?>
+                  <li><a class="dropdown-item" href="<?= BASEURL; ?>/profile"><i class="bi bi-person-circle me-2"></i>Profil Saya</a></li>
+                  <li>
+                    <hr class="dropdown-divider">
+                  </li>
+                <?php endif; ?>
+                <li><a class="dropdown-item" href="<?= BASEURL; ?>/auth/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+              </ul>
             </li>
           <?php else : ?>
-            <li class="nav-item">
-              <a class="nav-link" href="<?= BASEURL; ?>/login">Login</a>
+            <li class="nav-item ms-lg-2">
+              <a class="nav-link btn-login-nav" href="<?= BASEURL; ?>/login">Sign In</a>
             </li>
           <?php endif; ?>
-        </ul>
 
+        </ul>
       </div>
     </div>
   </nav>

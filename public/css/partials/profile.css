@@ -1,0 +1,87 @@
+/* ==========================================
+   PROFIL SAYA (Warm & Classic Aesthetic)
+   ========================================== */
+
+.profile-fullscreen {
+  position: relative;
+  min-height: calc(100vh - var(--navbar-height));
+  min-height: calc(100svh - var(--navbar-height));
+  background: url("../../img/background/profile.jpg") no-repeat center center;
+  background-size: cover;
+  padding: 120px 20px 60px;
+}
+
+.profile-fullscreen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 12, 10, 0.55);
+}
+
+.profile-fullscreen .container {
+  position: relative;
+  z-index: 2;
+}
+
+.profile-card {
+  background-color: rgba(255, 250, 240, 0.95);
+  border: 1px solid rgba(229, 193, 88, 0.5);
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.profile-card-header {
+  background: linear-gradient(135deg, #1a0f07, #3a2414);
+  padding: 1.5rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(229, 193, 88, 0.5);
+}
+
+.profile-card-header h4 {
+  font-family: "Georgia", "Playfair Display", serif;
+  color: #f7e7ce;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.profile-card-body {
+  padding: 2rem;
+  color: #2b1d10;
+}
+
+.profile-photo-wrapper img {
+  border: 3px solid #e5c158;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.profile-card-body .form-label {
+  font-weight: 600;
+  color: #4a3320;
+}
+
+.profile-card-body .form-control {
+  border-radius: 10px;
+  border: 1px solid rgba(74, 51, 32, 0.25);
+}
+
+.profile-card-body .form-control:focus {
+  border-color: #e5c158;
+  box-shadow: 0 0 0 0.2rem rgba(229, 193, 88, 0.25);
+}
+
+.btn-profile-save {
+  background: linear-gradient(135deg, #e5c158, #ffd700);
+  border: none;
+  color: #1a0f07;
+  font-weight: 600;
+  border-radius: 25px;
+  padding: 0.6rem 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-profile-save:hover {
+  color: #1a0f07;
+  box-shadow: 0 0 14px rgba(229, 193, 88, 0.6);
+  transform: translateY(-2px);
+}
