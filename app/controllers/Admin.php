@@ -11,29 +11,16 @@ class Admin extends Controller
 
         $data['judul'] = 'Admin';
 
-        // =========================
-        // PAGINATION daftar buku untuk dikelola
-        // (status baca, progress, catatan pribadi)
-        // =========================
-        $page = (int) ($_GET['page'] ?? 1);
-        if ($page < 1) {
-            $page = 1;
-        }
-
         $buku = $this->model('Buku');
-
         $total = $buku->countAllBuku();
-        $totalPages = (int) max(1, ceil($total / self::PER_PAGE));
 
-        if ($page > $totalPages) {
-            $page = $totalPages;
-        }
-
-        $offset = ($page - 1) * self::PER_PAGE;
+        $pagination = new Pagination((int) ($_GET['page'] ?? 1), self::PER_PAGE, $total);
+        $page = $pagination->getPage();
+        $offset = $pagination->getOffset();
 
         $data['buku'] = $buku->getAllBuku(self::PER_PAGE, $offset);
         $data['currentPage'] = $page;
-        $data['totalPages'] = $totalPages;
+        $data['totalPages'] = $pagination->getTotalPages();
         $data['statusBacaOptions'] = Buku::STATUS_BACA;
 
         // =========================
