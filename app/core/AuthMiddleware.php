@@ -20,6 +20,33 @@ class AuthMiddleware
         self::regenerateIdPeriodically();
     }
 
+    /**
+     * Versi requireLogin()/requireAdmin() untuk endpoint AJAX (fetch).
+     * Endpoint AJAX TIDAK boleh me-redirect ke halaman login: fetch akan mengikuti redirect
+     * dan JavaScript menerima HTML halaman login (status 200) sebagai "jawaban".
+     * Karena itu di sini hasilnya berupa [status HTTP, pesan] atau null kalau lolos.
+     */
+    public static function ajaxAuthError(bool $butuhAdmin = true): ?array
+    {
+        if (empty($_SESSION['login'])) {
+            return [401, 'Sesi berakhir. Silakan login kembali.'];
+        }
+
+        if (self::isIdleExpired()) {
+            self::destroySession();
+            return [401, 'Sesi berakhir. Silakan login kembali.'];
+        }
+
+        $_SESSION['last_activity'] = time();
+        self::regenerateIdPeriodically();
+
+        if ($butuhAdmin && ($_SESSION['role'] ?? '') !== 'admin') {
+            return [403, 'Akses ditolak'];
+        }
+
+        return null;
+    }
+
     public static function requireAdmin(): void
     {
         self::requireLogin();

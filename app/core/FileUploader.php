@@ -100,6 +100,11 @@ class FileUploader
      */
     public function deleteFile(string $filename, string $type = 'profile'): bool
     {
+        // Nama kosong berarti path = folder itu sendiri -> jangan diproses sama sekali
+        if ($filename === '') {
+            return false;
+        }
+
         // Validasi input untuk mencegah directory traversal
         if (strpos($filename, '/') !== false || strpos($filename, '\\') !== false) {
             return false;

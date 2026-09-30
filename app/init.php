@@ -1,29 +1,17 @@
 <?php
 
-// Manual load untuk file yang tidak bisa di-autoload
-require_once __DIR__ . '/config/config.php';
+// Hanya config yang dimuat manual (berisi konstanta yang dipakai class lain).
+require_once __DIR__ . '/config/index.php';
 
-// Manual load core class
-require_once __DIR__ . '/core/App.php';
-require_once __DIR__ . '/core/Controller.php';
-require_once __DIR__ . '/core/Database.php';
-require_once __DIR__ . '/core/AuthMiddleware.php';
-require_once __DIR__ . '/core/Csrf.php';
-require_once __DIR__ . '/core/LoginThrottle.php';
-require_once __DIR__ . '/core/Validator.php';
-require_once __DIR__ . '/core/FileUploader.php';
-
-// Autoload untuk controllers dan models
+// Semua class lain (core, controllers, models) dimuat otomatis saat pertama kali dipakai.
+// Nama class harus sama persis dengan nama file (contoh: class Buku -> models/Buku.php).
 spl_autoload_register(function ($class) {
-    $controllerPath = 'controllers/' . $class . '.php';
-    $modelPath = 'models/' . $class . '.php';
-    $corePath = 'core/' . $class . '.php';
+    foreach (['controllers', 'models', 'core'] as $folder) {
+        $file = __DIR__ . '/' . $folder . '/' . $class . '.php';
 
-    if (file_exists(__DIR__ . '/' . $controllerPath)) {
-        require_once __DIR__ . '/' . $controllerPath;
-    } elseif (file_exists(__DIR__ . '/' . $modelPath)) {
-        require_once __DIR__ . '/' . $modelPath;
-    } elseif (file_exists(__DIR__ . '/' . $corePath)) {
-        require_once __DIR__ . '/' . $corePath;
+        if (is_file($file)) {
+            require_once $file;
+            return;
+        }
     }
 });

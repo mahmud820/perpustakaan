@@ -2,32 +2,17 @@
 
 /** @var array $data */
 
-$cover = !empty($data['buku']['cover'])
-    ? BASEURL . '/img/dataGambar/' . rawurlencode($data['buku']['cover'])
-    : BASEURL . '/img/no-image.png';
-
-// Prioritas: file PDF yang diupload, lalu link eksternal
-$urlBaca = '';
-if (!empty($data['buku']['file_baca'])) {
-    $urlBaca = BASEURL . '/uploads/pdf/' . rawurlencode($data['buku']['file_baca']);
-} elseif (!empty($data['buku']['link_baca'])) {
-    $urlBaca = $data['buku']['link_baca'];
-}
+$cover = ViewHelper::coverUrl($data['buku']['cover'] ?? null);
+$urlBaca = ViewHelper::bacaUrl($data['buku']);
 
 // Status Baca & Progress Membaca (ditandai oleh Admin, ditampilkan ke semua pengunjung)
-$statusBaca = $data['buku']['status_baca'] ?? 'belum_dibaca';
-$statusBadgeClass = [
-    'belum_dibaca'   => 'bg-secondary',
-    'sedang_dibaca'  => 'bg-warning text-dark',
-    'selesai_dibaca' => 'bg-success',
-][$statusBaca] ?? 'bg-secondary';
-$statusLabel = Buku::STATUS_BACA[$statusBaca] ?? 'Belum Dibaca';
+$statusBaca = $data['buku']['status_baca'] ?? null;
+$statusBadgeClass = ViewHelper::statusBadgeClass($statusBaca);
+$statusLabel = ViewHelper::statusLabel($statusBaca);
 
 $halamanDibaca = (int) ($data['buku']['halaman_dibaca'] ?? 0);
 $totalHalaman = $data['buku']['total_halaman'] ?? null;
-$persenProgress = ($totalHalaman && $totalHalaman > 0)
-    ? min(100, (int) round($halamanDibaca / $totalHalaman * 100))
-    : 0;
+$persenProgress = ViewHelper::progressPercent($halamanDibaca, $totalHalaman);
 ?>
 
 <div class="detail-page">
@@ -119,7 +104,7 @@ $persenProgress = ($totalHalaman && $totalHalaman > 0)
 
                                 <div class="col-md-6">
                                     <strong>Diupdate:</strong><br>
-                                    <?= htmlspecialchars((string) $data['buku']['updated_at']); ?>
+                                    <?= htmlspecialchars((string) ($data['buku']['updated_at'] ?? '')); ?>
                                 </div>
 
                             </div>

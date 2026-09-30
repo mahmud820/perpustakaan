@@ -52,6 +52,7 @@
     const BASEURL = '<?= BASEURL; ?>';
 </script>
 
+<script src="<?= BASEURL; ?>/js/buatanSendiri/helpers.js"></script>
 <script src="<?= BASEURL; ?>/js/buatanSendiri/buku.js"></script>
 <script src="<?= BASEURL; ?>/js/buatanSendiri/admin.js"></script>
 

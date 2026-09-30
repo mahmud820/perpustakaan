@@ -6,35 +6,23 @@ class DaftarBuku extends Controller
 
     public function index()
     {
-        $data['judul'] = 'Daftar-Buku';
+        $data['judul'] = 'Daftar Buku';
 
-        $keyword = trim($_GET['keyword'] ?? '');
-        $klasifikasi = trim($_GET['klasifikasi'] ?? '');
-
-        $keyword = mb_substr($keyword, 0, 100);
-        $klasifikasi = mb_substr($klasifikasi, 0, 100);
+        $keyword = mb_substr($this->query('keyword'), 0, 100);
+        $klasifikasi = mb_substr($this->query('klasifikasi'), 0, 100);
 
         $data['keyword'] = $keyword;
         $data['klasifikasi_terpilih'] = $klasifikasi;
 
-        $page = max(1, (int) ($_GET['page'] ?? 1));
-
         $buku = $this->model('Buku');
-        $adaFilter = ($keyword !== '' || $klasifikasi !== '');
 
-        $total = $adaFilter
-            ? $buku->countCariBuku($keyword, $klasifikasi)
-            : $buku->countAllBuku();
+        // cariBuku/countCariBuku otomatis menampilkan semua buku kalau keyword & kategori kosong
+        $total = $buku->countCariBuku($keyword, $klasifikasi);
 
-        $pagination = new Pagination($page, self::PER_PAGE, $total);
-        $page = $pagination->getPage();
-        $offset = $pagination->getOffset();
+        $pagination = new Pagination((int) ($_GET['page'] ?? 1), self::PER_PAGE, $total);
 
-        $data['buku'] = $adaFilter
-            ? $buku->cariBuku($keyword, $klasifikasi, self::PER_PAGE, $offset)
-            : $buku->getAllBuku(self::PER_PAGE, $offset);
-
-        $data['currentPage'] = $page;
+        $data['buku'] = $buku->cariBuku($keyword, $klasifikasi, self::PER_PAGE, $pagination->getOffset());
+        $data['currentPage'] = $pagination->getPage();
         $data['totalPages'] = $pagination->getTotalPages();
         $data['daftarKlasifikasi'] = $buku->getAllKlasifikasi();
 
@@ -43,25 +31,17 @@ class DaftarBuku extends Controller
         $this->view('templates/footer');
     }
 
-    public function detail($id)
+    public function detail($id = '')
     {
         if (!ctype_digit((string) $id)) {
-            http_response_code(404);
-            $data['judul'] = 'Buku Tidak Ditemukan';
-            $this->view('templates/header', $data);
-            $this->view('daftarBuku/notfound', $data);
-            $this->view('templates/footer');
+            $this->tampilkanTidakDitemukan();
             return;
         }
 
         $buku = $this->model('Buku')->getBukuById($id);
 
         if (!$buku) {
-            http_response_code(404);
-            $data['judul'] = 'Buku Tidak Ditemukan';
-            $this->view('templates/header', $data);
-            $this->view('daftarBuku/notfound', $data);
-            $this->view('templates/footer');
+            $this->tampilkanTidakDitemukan();
             return;
         }
 
@@ -73,295 +53,150 @@ class DaftarBuku extends Controller
         $this->view('templates/footer');
     }
 
+    // =========================
+    // ENDPOINT AJAX (semua membalas teks: "success" jika berhasil, selain itu pesan error)
+    // =========================
+
     public function tambah()
     {
-        AuthMiddleware::requireAdmin();
+        $this->guardAdminPost();
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            echo '405 Method Not Allowed';
-            return;
+        $input = $this->inputBuku();
+
+        $error = Validator::buku($input);
+        if ($error !== null) {
+            $this->respond(422, $error);
         }
 
-        Csrf::guard();
-
-        $judul = trim($_POST['judul'] ?? '');
-        $penulis = trim($_POST['penulis'] ?? '');
-        $klasifikasi = trim($_POST['klasifikasi'] ?? '');
-        $sinopsis = trim($_POST['sinopsis'] ?? '');
-        $linkBaca = trim($_POST['link_baca'] ?? '');
-
-        $errors = [
-            'judul' => Validator::judul($judul),
-            'penulis' => Validator::penulis($penulis),
-            'klasifikasi' => Validator::klasifikasi($klasifikasi),
-            'sinopsis' => Validator::sinopsis($sinopsis),
-            'link_baca' => Validator::linkBaca($linkBaca),
-        ];
-
-        foreach ($errors as $error) {
-            if ($error !== null) {
-                http_response_code(422);
-                echo $error;
-                return;
-            }
-        }
-
-        $data = [
-            'judul' => $judul,
-            'penulis' => $penulis,
-            'klasifikasi' => $klasifikasi,
-            'sinopsis' => $sinopsis,
-            'link_baca' => $linkBaca,
-        ];
-
-        $hasil = $this->model('Buku')->tambahBuku($data, $_FILES);
-
-        if ($hasil === true) {
-            echo 'success';
-            return;
-        }
-
-        if (is_array($hasil) && isset($hasil['code'], $hasil['error'])) {
-            http_response_code($hasil['code']);
-            echo $hasil['error'];
-            return;
-        }
-
-        http_response_code(500);
-        echo is_string($hasil) ? $hasil : 'Terjadi kesalahan pada server';
+        $this->respondResult($this->model('Buku')->tambahBuku($input, $_FILES));
     }
 
     public function update()
     {
-        AuthMiddleware::requireAdmin();
+        $this->guardAdminPost();
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            echo '405 Method Not Allowed';
-            return;
-        }
-
-        Csrf::guard();
-
-        $id = trim($_POST['id'] ?? '');
-        $judul = trim($_POST['judul'] ?? '');
-        $penulis = trim($_POST['penulis'] ?? '');
-        $klasifikasi = trim($_POST['klasifikasi'] ?? '');
-        $sinopsis = trim($_POST['sinopsis'] ?? '');
-        $linkBaca = trim($_POST['link_baca'] ?? '');
-        $hapusFileBaca = !empty($_POST['hapus_file_baca']);
+        $id = $this->post('id');
 
         $idError = Validator::requiredId($id);
         if ($idError !== null) {
-            http_response_code(400);
-            echo $idError;
-            return;
+            $this->respond(400, $idError);
         }
 
-        $errors = [
-            'judul' => Validator::judul($judul),
-            'penulis' => Validator::penulis($penulis),
-            'klasifikasi' => Validator::klasifikasi($klasifikasi),
-            'sinopsis' => Validator::sinopsis($sinopsis),
-            'link_baca' => Validator::linkBaca($linkBaca),
-        ];
+        $input = $this->inputBuku();
 
-        foreach ($errors as $error) {
-            if ($error !== null) {
-                http_response_code(422);
-                echo $error;
-                return;
-            }
+        $error = Validator::buku($input);
+        if ($error !== null) {
+            $this->respond(422, $error);
         }
 
-        $data = [
-            'id' => (int) $id,
-            'judul' => $judul,
-            'penulis' => $penulis,
-            'klasifikasi' => $klasifikasi,
-            'sinopsis' => $sinopsis,
-            'link_baca' => $linkBaca,
-            'hapus_file_baca' => $hapusFileBaca,
-        ];
+        $input['id'] = (int) $id;
+        $input['hapus_file_baca'] = !empty($_POST['hapus_file_baca']);
 
-        $hasil = $this->model('Buku')->updateBuku($data, $_FILES);
-
-        if ($hasil === true) {
-            echo 'success';
-            return;
-        }
-
-        if (is_array($hasil) && isset($hasil['code'], $hasil['error'])) {
-            http_response_code($hasil['code']);
-            echo $hasil['error'];
-            return;
-        }
-
-        if (is_string($hasil)) {
-            $statusMap = ['Buku tidak ditemukan' => 404];
-            http_response_code($statusMap[$hasil] ?? 500);
-            echo $hasil;
-            return;
-        }
-
-        http_response_code(500);
-        echo 'Terjadi kesalahan pada server';
+        $this->respondResult($this->model('Buku')->updateBuku($input, $_FILES));
     }
 
     public function hapus()
     {
-        if (!AuthMiddleware::isAdmin()) {
-            http_response_code(403);
-            echo 'Akses ditolak';
-            return;
-        }
+        $this->guardAdminPost();
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            echo 'Method tidak diizinkan';
-            return;
-        }
+        $id = $this->post('id');
 
-        if (!Csrf::verify()) {
-            http_response_code(403);
-            echo 'Sesi tidak valid atau kedaluwarsa (CSRF)';
-            return;
-        }
-
-        $id = trim($_POST['id'] ?? '');
         $idError = Validator::requiredId($id);
-
         if ($idError !== null) {
-            http_response_code(400);
-            echo $idError;
-            return;
+            $this->respond(400, $idError);
         }
 
-        $hasil = $this->model('Buku')->hapusBuku(['id' => (int) $id]);
-
-        if ($hasil > 0) {
-            echo 'Buku berhasil dihapus';
-        } else {
-            http_response_code(404);
-            echo 'Buku tidak ditemukan';
-        }
+        $this->respondResult($this->model('Buku')->hapusBuku((int) $id));
     }
 
     public function updateStatus()
     {
-        AuthMiddleware::requireAdmin();
+        $this->guardAdminPost();
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            echo '405 Method Not Allowed';
-            return;
-        }
-
-        Csrf::guard();
-
-        $id = trim($_POST['id'] ?? '');
-        $status = trim($_POST['status_baca'] ?? '');
+        $id = $this->post('id');
+        $status = $this->post('status_baca');
 
         $idError = Validator::requiredId($id);
         if ($idError !== null) {
-            http_response_code(400);
-            echo $idError;
-            return;
+            $this->respond(400, $idError);
         }
 
         if (!Validator::statusBaca($status)) {
-            http_response_code(422);
-            echo 'Status baca tidak valid';
-            return;
+            $this->respond(422, 'Status baca tidak valid');
         }
 
-        $hasil = $this->model('Buku')->updateStatusBaca($id, $status);
-
-        if ($hasil) {
-            echo 'success';
-        } else {
-            http_response_code(500);
-            echo 'Status baca gagal disimpan';
-        }
+        $this->respondResult($this->model('Buku')->updateStatusBaca((int) $id, $status));
     }
 
     public function updateProgress()
     {
-        AuthMiddleware::requireAdmin();
+        $this->guardAdminPost();
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            echo '405 Method Not Allowed';
-            return;
-        }
-
-        Csrf::guard();
-
-        $id = trim($_POST['id'] ?? '');
-        $halamanDibaca = trim($_POST['halaman_dibaca'] ?? '0');
-        $totalHalaman = trim($_POST['total_halaman'] ?? '');
+        $id = $this->post('id');
+        $halamanDibaca = $this->post('halaman_dibaca', '0');
+        $totalHalaman = $this->post('total_halaman');
 
         $idError = Validator::requiredId($id);
         if ($idError !== null) {
-            http_response_code(400);
-            echo $idError;
-            return;
+            $this->respond(400, $idError);
         }
 
         $progressError = Validator::progressBuku($halamanDibaca, $totalHalaman);
         if ($progressError !== null) {
-            http_response_code(422);
-            echo $progressError;
-            return;
+            $this->respond(422, $progressError);
         }
 
-        $hasil = $this->model('Buku')->updateProgress($id, $halamanDibaca, $totalHalaman);
-
-        if ($hasil === true) {
-            echo 'success';
-        } else {
-            http_response_code(422);
-            echo $hasil;
-        }
+        $this->respondResult($this->model('Buku')->updateProgress(
+            (int) $id,
+            (int) $halamanDibaca,
+            $totalHalaman === '' ? null : (int) $totalHalaman
+        ));
     }
 
     public function updateCatatan()
     {
-        AuthMiddleware::requireAdmin();
+        $this->guardAdminPost();
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            echo '405 Method Not Allowed';
-            return;
-        }
-
-        Csrf::guard();
-
-        $id = trim($_POST['id'] ?? '');
-        $catatan = trim($_POST['catatan_pribadi'] ?? '');
+        $id = $this->post('id');
+        $catatan = $this->post('catatan_pribadi');
 
         $idError = Validator::requiredId($id);
         if ($idError !== null) {
-            http_response_code(400);
-            echo $idError;
-            return;
+            $this->respond(400, $idError);
         }
 
         $catatanError = Validator::catatanPribadi($catatan);
         if ($catatanError !== null) {
-            http_response_code(422);
-            echo $catatanError;
-            return;
+            $this->respond(422, $catatanError);
         }
 
-        $hasil = $this->model('Buku')->updateCatatanPribadi($id, $catatan);
+        $this->respondResult($this->model('Buku')->updateCatatanPribadi((int) $id, $catatan));
+    }
 
-        if ($hasil) {
-            echo 'success';
-        } else {
-            http_response_code(500);
-            echo 'Catatan gagal disimpan';
-        }
+    // =========================
+    // HELPER PRIVATE
+    // =========================
+
+    // Field form buku yang dipakai bersama oleh tambah() dan update()
+    private function inputBuku(): array
+    {
+        return [
+            'judul'       => $this->post('judul'),
+            'penulis'     => $this->post('penulis'),
+            'klasifikasi' => $this->post('klasifikasi'),
+            'sinopsis'    => $this->post('sinopsis'),
+            'link_baca'   => $this->post('link_baca'),
+        ];
+    }
+
+    private function tampilkanTidakDitemukan(): void
+    {
+        http_response_code(404);
+
+        $data['judul'] = 'Buku Tidak Ditemukan';
+
+        $this->view('templates/header', $data);
+        $this->view('daftarBuku/notfound', $data);
+        $this->view('templates/footer');
     }
 }

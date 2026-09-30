@@ -54,7 +54,10 @@ class User
         $tagline  = trim($data['tagline'] ?? '');
         $tentang  = trim($data['tentang'] ?? '');
 
-        $gambarLama = $data['gambarLama'] ?? '';
+        // Nama foto lama diambil dari database, BUKAN dari form: nilai dari form bisa dipalsukan
+        // sehingga file milik orang lain bisa terhapus / kolom gambar terisi nama sembarang.
+        $userLama = $this->getUserById($id);
+        $gambarLama = $userLama['gambar'] ?? '';
         $hasilUpload = $this->fileUploader->uploadProfil($files);
 
         if (is_array($hasilUpload)) {

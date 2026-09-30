@@ -13,11 +13,10 @@
           <div class="profile-card-body">
             <form action="<?= BASEURL; ?>/profile/update" method="POST" enctype="multipart/form-data">
               <?= Csrf::field(); ?>
-              <input type="hidden" name="gambarLama" value="<?= htmlspecialchars($data['user']['gambar'] ?? ''); ?>">
 
               <!-- Foto Profil -->
               <div class="text-center mb-4 profile-photo-wrapper">
-                <img src="<?= BASEURL; ?>/img/<?= $data['user']['gambar'] ? 'profil/' . htmlspecialchars($data['user']['gambar']) : 'default.jpg'; ?>"
+                <img src="<?= BASEURL; ?>/img/<?= !empty($data['user']['gambar']) ? 'profil/' . htmlspecialchars($data['user']['gambar']) : 'default.png'; ?>"
                   class="rounded-circle img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
                 <div class="mt-2">
                   <input type="file" class="form-control" name="gambar" id="gambar" accept=".jpg,.jpeg,.png,.webp">

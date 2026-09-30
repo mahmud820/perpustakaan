@@ -60,9 +60,7 @@
                         <div class="card h-100 shadow-sm">
 
                             <img
-                                src="<?= !empty($buku['cover'])
-                                            ? BASEURL . '/img/dataGambar/' . rawurlencode($buku['cover'])
-                                            : BASEURL . '/img/no-image.png'; ?>"
+                                src="<?= ViewHelper::coverUrl($buku['cover'] ?? null); ?>"
                                 class="card-img-top cover-img"
                                 alt="<?= htmlspecialchars((string) $buku['judul']); ?>"
                                 onerror="this.onerror=null;this.src='<?= BASEURL; ?>/img/no-image.png';">
@@ -84,24 +82,14 @@
                                 <?php endif; ?>
 
                                 <?php
-                                // Badge Status Baca (bootstrap color per status)
-                                $statusBaca = $buku['status_baca'] ?? 'belum_dibaca';
-                                $statusBadgeClass = [
-                                    'belum_dibaca'   => 'bg-secondary',
-                                    'sedang_dibaca'  => 'bg-warning text-dark',
-                                    'selesai_dibaca' => 'bg-success',
-                                ][$statusBaca] ?? 'bg-secondary';
-                                $statusLabel = Buku::STATUS_BACA[$statusBaca] ?? 'Belum Dibaca';
-
+                                $statusBaca = $buku['status_baca'] ?? null;
                                 $halamanDibaca = (int) ($buku['halaman_dibaca'] ?? 0);
                                 $totalHalaman = $buku['total_halaman'] ?? null;
-                                $persenProgress = ($totalHalaman && $totalHalaman > 0)
-                                    ? min(100, (int) round($halamanDibaca / $totalHalaman * 100))
-                                    : 0;
+                                $persenProgress = ViewHelper::progressPercent($halamanDibaca, $totalHalaman);
                                 ?>
 
                                 <p class="card-text mb-2">
-                                    <span class="badge <?= $statusBadgeClass; ?>"><?= htmlspecialchars($statusLabel); ?></span>
+                                    <span class="badge <?= ViewHelper::statusBadgeClass($statusBaca); ?>"><?= htmlspecialchars(ViewHelper::statusLabel($statusBaca)); ?></span>
                                 </p>
 
                                 <?php if (!empty($totalHalaman)) : ?>
@@ -120,15 +108,7 @@
 
                                 <div class="mt-auto">
 
-                                    <?php
-                                    // Prioritas: file PDF yang diupload, lalu link eksternal
-                                    $urlBaca = '';
-                                    if (!empty($buku['file_baca'])) {
-                                        $urlBaca = BASEURL . '/uploads/pdf/' . rawurlencode($buku['file_baca']);
-                                    } elseif (!empty($buku['link_baca'])) {
-                                        $urlBaca = $buku['link_baca'];
-                                    }
-                                    ?>
+                                    <?php $urlBaca = ViewHelper::bacaUrl($buku); ?>
 
                                     <?php if ($urlBaca !== '') : ?>
                                         <a
@@ -192,53 +172,27 @@
 
         </div>
 
-        <?php if (($data['totalPages'] ?? 1) > 1) : ?>
-            <?php
-            // Bangun query string dasar (keyword/klasifikasi) agar filter tetap terjaga saat pindah halaman
-            $paramsPaging = [];
-            if (!empty($data['keyword'])) {
-                $paramsPaging['keyword'] = $data['keyword'];
-            }
-            if (!empty($data['klasifikasi_terpilih'])) {
-                $paramsPaging['klasifikasi'] = $data['klasifikasi_terpilih'];
-            }
-            $buatUrlHalaman = function ($halaman) use ($paramsPaging) {
-                $params = $paramsPaging;
-                $params['page'] = $halaman;
-                return BASEURL . '/daftarBuku?' . http_build_query($params);
-            };
-            ?>
-            <nav aria-label="Navigasi halaman daftar buku" class="mt-4">
-                <ul class="pagination library-pagination justify-content-center flex-wrap">
+        <?php
+        // Query string dasar (keyword/klasifikasi) dipertahankan saat pindah halaman
+        $paramsPaging = array_filter([
+            'keyword' => $data['keyword'] ?? '',
+            'klasifikasi' => $data['klasifikasi_terpilih'] ?? '',
+        ], 'strlen');
 
-                    <li class="page-item <?= $data['currentPage'] <= 1 ? 'disabled' : ''; ?>">
-                        <a class="page-link"
-                            href="<?= $buatUrlHalaman(max(1, $data['currentPage'] - 1)); ?>">
-                            &laquo; Sebelumnya
-                        </a>
-                    </li>
-
-                    <?php for ($i = 1; $i <= $data['totalPages']; $i++) : ?>
-
-                        <li class="page-item <?= $i === $data['currentPage'] ? 'active' : ''; ?>">
-                            <a class="page-link"
-                                href="<?= $buatUrlHalaman($i); ?>">
-                                <?= $i; ?>
-                            </a>
-                        </li>
-
-                    <?php endfor; ?>
-
-                    <li class="page-item <?= $data['currentPage'] >= $data['totalPages'] ? 'disabled' : ''; ?>">
-                        <a class="page-link"
-                            href="<?= $buatUrlHalaman(min($data['totalPages'], $data['currentPage'] + 1)); ?>">
-                            Selanjutnya &raquo;
-                        </a>
-                    </li>
-
-                </ul>
-            </nav>
-        <?php endif; ?>
+        $pager = [
+            'ariaLabel' => 'Navigasi halaman daftar buku',
+            'ulClass' => 'pagination library-pagination justify-content-center flex-wrap',
+            'linkClass' => '',
+            'prevLabel' => '&laquo; Sebelumnya',
+            'nextLabel' => 'Selanjutnya &raquo;',
+            'current' => $data['currentPage'],
+            'total' => $data['totalPages'] ?? 1,
+            'urlFor' => function ($halaman) use ($paramsPaging) {
+                return BASEURL . '/daftarBuku?' . http_build_query($paramsPaging + ['page' => $halaman]);
+            },
+        ];
+        require __DIR__ . '/../templates/pagination.php';
+        ?>
 
     </div>
 </section>
@@ -252,8 +206,6 @@
                 <form id="addBookForm" enctype="multipart/form-data">
                     <?= Csrf::field(); ?>
                     <input type="hidden" name="id" id="id">
-                    <input type="hidden" name="cover_lama" id="cover_lama">
-                    <input type="hidden" name="file_baca_lama" id="file_baca_lama">
 
                     <div class="modal-header">
                         <h5 class="modal-title">Tambah Buku</h5>

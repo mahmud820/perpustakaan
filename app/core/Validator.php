@@ -11,6 +11,27 @@ class Validator
         return null;
     }
 
+    // Validasi semua field form buku sekaligus (dipakai tambah & update).
+    // Mengembalikan pesan error pertama, atau null kalau semua valid.
+    public static function buku(array $input): ?string
+    {
+        $errors = [
+            self::judul($input['judul'] ?? ''),
+            self::penulis($input['penulis'] ?? ''),
+            self::klasifikasi($input['klasifikasi'] ?? ''),
+            self::sinopsis($input['sinopsis'] ?? ''),
+            self::linkBaca($input['link_baca'] ?? ''),
+        ];
+
+        foreach ($errors as $error) {
+            if ($error !== null) {
+                return $error;
+            }
+        }
+
+        return null;
+    }
+
     public static function judul($judul): ?string
     {
         $judul = trim((string) $judul);
@@ -100,17 +121,18 @@ class Validator
 
     public static function progressBuku($halamanDibaca, $totalHalaman): ?string
     {
-        if (!ctype_digit((string) $halamanDibaca)) {
+        $halamanDibaca = trim((string) $halamanDibaca);
+        $totalHalaman = trim((string) $totalHalaman);   // null / '' = total tidak diisi
+
+        if (!ctype_digit($halamanDibaca)) {
             return 'Halaman dibaca tidak valid';
         }
 
-        $totalHalaman = ($totalHalaman === '' || $totalHalaman === null) ? null : (int) $totalHalaman;
-
-        if ($totalHalaman !== null && !ctype_digit((string) $totalHalaman)) {
+        if ($totalHalaman !== '' && !ctype_digit($totalHalaman)) {
             return 'Total halaman tidak valid';
         }
 
-        if ($totalHalaman !== null && (int) $halamanDibaca > $totalHalaman) {
+        if ($totalHalaman !== '' && (int) $halamanDibaca > (int) $totalHalaman) {
             return 'Halaman dibaca tidak boleh melebihi total halaman';
         }
 

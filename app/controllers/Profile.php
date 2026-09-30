@@ -4,15 +4,10 @@ class Profile extends Controller
 {
     public function index()
     {
-        $userId = $_SESSION['user_id'] ?? null;
+        AuthMiddleware::requireLogin();
 
-        if ($userId === null) {
-            header('Location: ' . BASEURL . '/auth/login');
-            exit;
-        }
-
-        $data['title'] = 'Profil Saya';
-        $data['user'] = $this->model('User')->getUserById($userId);
+        $data['judul'] = 'Profil Saya';
+        $data['user'] = $this->model('User')->getUserById($_SESSION['user_id']);
 
         $this->view('templates/header', $data);
         $this->view('profile/index', $data);
@@ -21,6 +16,9 @@ class Profile extends Controller
 
     public function update()
     {
+        // WAJIB login: tanpa ini, pengunjung anonim bisa mengirim POST dan memicu upload file
+        AuthMiddleware::requireLogin();
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo '405 Method Not Allowed';
@@ -29,11 +27,11 @@ class Profile extends Controller
 
         Csrf::guard();
 
-        $nama = trim($_POST['nama'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $noTelp = trim($_POST['no_telp'] ?? '');
-        $tagline = trim($_POST['tagline'] ?? '');
-        $tentang = trim($_POST['tentang'] ?? '');
+        $nama = $this->post('nama');
+        $email = $this->post('email');
+        $noTelp = $this->post('no_telp');
+        $tagline = $this->post('tagline');
+        $tentang = $this->post('tentang');
 
         $errors = [
             'nama' => Validator::nama($nama),
@@ -51,11 +49,17 @@ class Profile extends Controller
             }
         }
 
-        $hasil = $this->model('User')->updateProfileData($_POST, $_FILES);
+        $hasil = $this->model('User')->updateProfileData([
+            'nama' => $nama,
+            'email' => $email,
+            'no_telp' => $noTelp,
+            'tagline' => $tagline,
+            'tentang' => $tentang,
+        ], $_FILES);
 
         if ($hasil['success']) {
             $_SESSION['flash_success'] = 'Profil berhasil diperbarui';
-            $_SESSION['nama'] = trim($_POST['nama']);
+            $_SESSION['nama'] = $nama;
             if (!empty($hasil['gambar'])) {
                 $_SESSION['gambar'] = $hasil['gambar'];
             }

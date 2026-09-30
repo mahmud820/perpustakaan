@@ -57,18 +57,7 @@
                 <?php if (!empty($stats['terbaru'])) : ?>
                     <div class="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-3">
                         <?php foreach ($stats['terbaru'] as $b) : ?>
-                            <?php
-                            $coverTerbaru = !empty($b['cover'])
-                                ? BASEURL . '/img/dataGambar/' . rawurlencode($b['cover'])
-                                : BASEURL . '/img/no-image.png';
-                            $statusTerbaru = $b['status_baca'] ?? 'belum_dibaca';
-                            $statusLabelTerbaru = Buku::STATUS_BACA[$statusTerbaru] ?? 'Belum Dibaca';
-                            $statusBadgeTerbaru = [
-                                'belum_dibaca'   => 'bg-secondary text-white',
-                                'sedang_dibaca'  => 'bg-warning text-dark',
-                                'selesai_dibaca' => 'bg-success text-white',
-                            ][$statusTerbaru] ?? 'bg-secondary text-white';
-                            ?>
+                            <?php $coverTerbaru = ViewHelper::coverUrl($b['cover'] ?? null); ?>
                             <div class="col text-center">
                                 <a href="<?= BASEURL; ?>/daftarBuku/detail/<?= (int) $b['id']; ?>" class="text-decoration-none text-body d-block">
                                     <div class="ratio ratio-2x3 mb-2 shadow-sm rounded overflow-hidden">
@@ -80,7 +69,7 @@
                                     <div class="small fw-bold text-truncate mb-1" title="<?= htmlspecialchars((string) $b['judul']); ?>">
                                         <?= htmlspecialchars((string) $b['judul']); ?>
                                     </div>
-                                    <span class="badge badge-pill-custom <?= $statusBadgeTerbaru; ?>"><?= htmlspecialchars($statusLabelTerbaru); ?></span>
+                                    <span class="badge badge-pill-custom <?= ViewHelper::statusBadgeClass($b['status_baca'] ?? null); ?>"><?= htmlspecialchars(ViewHelper::statusLabel($b['status_baca'] ?? null)); ?></span>
                                 </a>
                             </div>
                         <?php endforeach; ?>
@@ -121,15 +110,11 @@
                             <?php if (!empty($data['buku'])) : ?>
                                 <?php foreach ($data['buku'] as $buku) : ?>
                                     <?php
-                                    $cover = !empty($buku['cover'])
-                                        ? BASEURL . '/img/dataGambar/' . rawurlencode($buku['cover'])
-                                        : BASEURL . '/img/no-image.png';
+                                    $cover = ViewHelper::coverUrl($buku['cover'] ?? null);
                                     $totalHalaman = (int) ($buku['total_halaman'] ?? 0);
                                     $halamanDibaca = (int) ($buku['halaman_dibaca'] ?? 0);
                                     $catatan = $buku['catatan_pribadi'] ?? '';
-
-                                    // Hitung persen progress
-                                    $percent = ($totalHalaman > 0) ? min(100, round(($halamanDibaca / $totalHalaman) * 100)) : 0;
+                                    $percent = ViewHelper::progressPercent($halamanDibaca, $totalHalaman);
                                     $statusCurrent = $buku['status_baca'] ?? 'belum_dibaca';
                                     ?>
                                     <tr data-id="<?= (int) $buku['id']; ?>">
@@ -191,46 +176,21 @@
                     </table>
                 </div>
 
-                <?php if (($data['totalPages'] ?? 1) > 1) : ?>
-                    <nav aria-label="Navigasi halaman kelola buku" class="mt-4">
-
-                        <ul class="pagination admin-pagination pagination-sm justify-content-center flex-wrap gap-1">
-
-                            <li class="page-item <?= $data['currentPage'] <= 1 ? 'disabled' : ''; ?>">
-
-                                <a class="page-link rounded-circle border-0"
-                                    href="<?= BASEURL; ?>/admin?page=<?= max(1, $data['currentPage'] - 1); ?>">
-                                    &lsaquo;
-                                </a>
-
-                            </li>
-
-                            <?php for ($i = 1; $i <= $data['totalPages']; $i++) : ?>
-
-                                <li class="page-item <?= $i === $data['currentPage'] ? 'active' : ''; ?>">
-
-                                    <a class="page-link rounded-circle border-0"
-                                        href="<?= BASEURL; ?>/admin?page=<?= $i; ?>">
-                                        <?= $i; ?>
-                                    </a>
-
-                                </li>
-
-                            <?php endfor; ?>
-
-                            <li class="page-item <?= $data['currentPage'] >= $data['totalPages'] ? 'disabled' : ''; ?>">
-
-                                <a class="page-link rounded-circle border-0"
-                                    href="<?= BASEURL; ?>/admin?page=<?= min($data['totalPages'], $data['currentPage'] + 1); ?>">
-                                    &rsaquo;
-                                </a>
-
-                            </li>
-
-                        </ul>
-
-                    </nav>
-                <?php endif; ?>
+                <?php
+                $pager = [
+                    'ariaLabel' => 'Navigasi halaman kelola buku',
+                    'ulClass' => 'pagination admin-pagination pagination-sm justify-content-center flex-wrap gap-1',
+                    'linkClass' => 'rounded-circle border-0',
+                    'prevLabel' => '&lsaquo;',
+                    'nextLabel' => '&rsaquo;',
+                    'current' => $data['currentPage'],
+                    'total' => $data['totalPages'] ?? 1,
+                    'urlFor' => function ($halaman) {
+                        return BASEURL . '/admin?page=' . $halaman;
+                    },
+                ];
+                require __DIR__ . '/../templates/pagination.php';
+                ?>
 
             </div>
         </div>

@@ -1,20 +1,7 @@
 // Semua elemen di bawah ini HANYA ada di halaman Dashboard Admin.
 // File ini dimuat di semua halaman (lewat footer), jadi setiap blok
 // dibungkus pengecekan null/length agar tidak error di halaman lain.
-
-// =========================
-// CSRF helper
-// Token diambil dari <meta name="csrf-token"> yang dirender server (lihat header.php)
-// dan dikirim lewat header X-CSRF-Token di setiap request state-changing (POST).
-// =========================
-function getCsrfToken() {
-  const meta = document.querySelector('meta[name="csrf-token"]');
-  return meta ? meta.getAttribute("content") : "";
-}
-
-function csrfHeaders(extra = {}) {
-  return Object.assign({ "X-CSRF-Token": getCsrfToken() }, extra);
-}
+// Fungsi bantu (postForm, notifySuccess, dll) ada di helpers.js.
 
 // =========================
 // STATUS BACA (auto-save saat dropdown diganti)
@@ -29,35 +16,27 @@ document.querySelectorAll(".status-baca-select").forEach((select) => {
       formData.append("id", id);
       formData.append("status_baca", status);
 
-      const response = await fetch(BASEURL + "/daftarBuku/updateStatus", {
-        method: "POST",
-        headers: csrfHeaders(),
-        body: formData,
-      });
+      const result = await postForm(
+        BASEURL + "/daftarBuku/updateStatus",
+        formData,
+      );
 
-      const hasil = await response.text();
+      if (result.ok) {
+        // simpan status terakhir yang BERHASIL disimpan
+        this.dataset.status = status;
 
-      if (response.ok && hasil.trim() === "success") {
-        Swal.fire({
-          icon: "success",
-          title: "Status baca diperbarui",
-          timer: 1200,
-          showConfirmButton: false,
-        });
+        notifySuccess("Status baca diperbarui");
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Gagal",
-          text: hasil.trim() || "Terjadi kesalahan",
-        });
+        // gagal disimpan -> kembalikan dropdown ke status sebelumnya
+        // supaya tampilan tidak berbohong soal data di database
+        this.value = this.dataset.status;
+
+        notifyFailure(result);
       }
     } catch (error) {
-      console.error(error);
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Terjadi kesalahan pada server",
-      });
+      this.value = this.dataset.status;
+
+      notifyServerError(error);
     }
   });
 });
@@ -69,46 +48,30 @@ document.querySelectorAll(".progress-form").forEach((form) => {
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const id = this.dataset.id;
-    const halamanDibaca =
-      this.querySelector(".halaman-dibaca-input").value || "0";
-    const totalHalaman = this.querySelector(".total-halaman-input").value || "";
+    const formData = new FormData();
+    formData.append("id", this.dataset.id);
+    formData.append(
+      "halaman_dibaca",
+      this.querySelector(".halaman-dibaca-input").value || "0",
+    );
+    formData.append(
+      "total_halaman",
+      this.querySelector(".total-halaman-input").value || "",
+    );
 
     try {
-      const formData = new FormData();
-      formData.append("id", id);
-      formData.append("halaman_dibaca", halamanDibaca);
-      formData.append("total_halaman", totalHalaman);
+      const result = await postForm(
+        BASEURL + "/daftarBuku/updateProgress",
+        formData,
+      );
 
-      const response = await fetch(BASEURL + "/daftarBuku/updateProgress", {
-        method: "POST",
-        headers: csrfHeaders(),
-        body: formData,
-      });
-
-      const hasil = await response.text();
-
-      if (response.ok && hasil.trim() === "success") {
-        Swal.fire({
-          icon: "success",
-          title: "Progress disimpan",
-          timer: 1200,
-          showConfirmButton: false,
-        }).then(() => location.reload());
+      if (result.ok) {
+        notifySuccess("Progress disimpan", { reload: true });
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Gagal",
-          text: hasil.trim() || "Terjadi kesalahan",
-        });
+        notifyFailure(result);
       }
     } catch (error) {
-      console.error(error);
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Terjadi kesalahan pada server",
-      });
+      notifyServerError(error);
     }
   });
 });
@@ -137,39 +100,20 @@ if (catatanModalEl && catatanForm) {
     e.preventDefault();
 
     try {
-      const formData = new FormData(this);
+      const result = await postForm(
+        BASEURL + "/daftarBuku/updateCatatan",
+        new FormData(this),
+      );
 
-      const response = await fetch(BASEURL + "/daftarBuku/updateCatatan", {
-        method: "POST",
-        headers: csrfHeaders(),
-        body: formData,
-      });
-
-      const hasil = await response.text();
-
-      if (response.ok && hasil.trim() === "success") {
+      if (result.ok) {
         catatanModal.hide();
 
-        Swal.fire({
-          icon: "success",
-          title: "Catatan disimpan",
-          timer: 1200,
-          showConfirmButton: false,
-        }).then(() => location.reload());
+        notifySuccess("Catatan disimpan", { reload: true });
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Gagal",
-          text: hasil.trim() || "Terjadi kesalahan",
-        });
+        notifyFailure(result);
       }
     } catch (error) {
-      console.error(error);
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Terjadi kesalahan pada server",
-      });
+      notifyServerError(error);
     }
   });
 }
