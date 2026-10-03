@@ -1,7 +1,6 @@
 <?php
 
-class App
-{
+class App {
   protected $controller = 'Beranda';
   protected $method = 'index';
   protected $params = [];
@@ -71,13 +70,13 @@ class App
     return null;
   }
 
-  public function parseUrl()
+  public function parseUrl() 
   {
-    if (isset($_GET['url'])) {
-      $url = rtrim($_GET['url'], '/');
-      $url = filter_var($url, FILTER_SANITIZE_URL);
-      return explode('/', $url);
-    }
-    return [];
+      if (isset($_GET['url'])) {
+        $url = rtrim($_GET['url'], '/');
+        $url = filter_var($url, FILTER_SANITIZE_URL);
+        return explode('/', $url);
+      }
+      return [];
   }
 }

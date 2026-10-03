@@ -18,6 +18,11 @@ class AuthMiddleware
 
         self::enforceIdleTimeout();
         self::regenerateIdPeriodically();
+
+        // Halaman ini berisi data pribadi (mis. catatan pribadi di dashboard admin).
+        // no-store mencegah browser menyimpannya, jadi tombol Back setelah logout tidak menampilkannya lagi.
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+        header('Pragma: no-cache');
     }
 
     /**

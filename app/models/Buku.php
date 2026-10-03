@@ -67,7 +67,9 @@ class Buku
         $this->db->bind('id', $kecualiId, PDO::PARAM_INT);
         $row = $this->db->single();
 
-        if ((int) ($row['total'] ?? 0) > 0) {
+        // COUNT(*) selalu menghasilkan satu baris. Kalau hasilnya bukan array, berarti query-nya gagal:
+        // lebih aman membiarkan file tersisa daripada menghapus file yang mungkin masih dipakai buku lain.
+        if (!is_array($row) || (int) ($row['total'] ?? 0) > 0) {
             return;
         }
 

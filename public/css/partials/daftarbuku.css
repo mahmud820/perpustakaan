@@ -1,22 +1,12 @@
 /* DAFTAR BUKU */
 .daftar-buku-section {
   position: relative;
-  min-height: calc(100vh - var(--navbar-height));
-  min-height: calc(100svh - var(--navbar-height));
   padding-top: 60px;
   padding-bottom: 40px;
   background: url("../../img/background/background3.jpg") no-repeat center
     center;
   background-size: cover;
 }
-
-/* Overlay */
-/* .daftar-buku-section::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.2);
-} */
 
 /* Isi */
 .daftar-buku-section .container {

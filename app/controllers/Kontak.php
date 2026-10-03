@@ -1,7 +1,6 @@
 <?php
 
-class Kontak extends Controller
-{
+class Kontak extends Controller {
   public function index()
   {
     $data['judul'] = 'Kontak';

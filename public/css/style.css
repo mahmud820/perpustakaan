@@ -1,3 +1,7 @@
+/* ==========================================
+   STYLE UTAMA
+   Urutan: partial per halaman -> variabel -> reset -> layout -> aturan bersama
+   ========================================== */
 @import url("partials/navbar.css");
 @import url("partials/beranda.css");
 @import url("partials/footer.css");
@@ -8,11 +12,17 @@
 @import url("partials/admin.css");
 @import url("partials/profile.css");
 
-/* Reset dasar */
+/* Variabel global */
 :root {
   --navbar-height: 80px; /* tinggi navbar fixed-top, dipakai semua section fullscreen */
+
+  /* Garis emas bercahaya, dipakai navbar (bawah) dan footer (atas) */
+  --gold-line: linear-gradient(90deg, transparent, #ffd700, transparent);
+  --gold-line-glow:
+    0 0 8px 2px rgba(255, 215, 0, 0.6), 0 0 18px 4px rgba(255, 215, 0, 0.3);
 }
 
+/* Reset dasar */
 html,
 body {
   width: 100%;
@@ -27,9 +37,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-top: var(
-    --navbar-height
-  ); /* dorong semua konten ke bawah navbar fixed-top, sekali untuk semua halaman */
+  padding-top: var(--navbar-height); /* dorong konten ke bawah navbar fixed-top, sekali untuk semua halaman */
 }
 
 /* Konten utama */
@@ -37,4 +45,18 @@ main {
   flex: 1;
   margin: 0;
   padding: 0;
+}
+
+/* Section fullscreen: setinggi layar dikurangi navbar.
+   Baris pertama = fallback browser lama; baris kedua (svh) = tinggi layar
+   yang tidak lompat saat address bar mobile muncul/hilang. */
+.hero-donghua,
+.about-fullscreen,
+.contact-fullscreen,
+.detail-page,
+.daftar-buku-section,
+.admin-fullscreen,
+.profile-fullscreen {
+  min-height: calc(100vh - var(--navbar-height));
+  min-height: calc(100svh - var(--navbar-height));
 }

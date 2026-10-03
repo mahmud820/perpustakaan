@@ -26,10 +26,8 @@
   right: 0;
   bottom: -1px;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #ffd700, transparent);
-  box-shadow:
-    0 0 8px 2px rgba(255, 215, 0, 0.6),
-    0 0 18px 4px rgba(255, 215, 0, 0.3);
+  background: var(--gold-line);
+  box-shadow: var(--gold-line-glow);
 }
 
 /* Brand / Logo */
@@ -144,10 +142,8 @@
   border: 2px solid #e5c158;
 }
 
+/* warna, italic, ukuran: sudah diatur oleh .user-greeting di atas */
 .profile-dropdown .user-greeting {
-  color: #e5c158 !important;
-  font-style: italic;
-  font-size: 0.9rem;
   padding: 0 !important;
 }
 

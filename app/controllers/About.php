@@ -1,7 +1,6 @@
 <?php
 
-class About extends Controller
-{
+class About extends Controller {
   public function index()
   {
     $data['judul'] = 'About';

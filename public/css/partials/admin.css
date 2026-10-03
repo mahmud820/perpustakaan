@@ -1,8 +1,6 @@
 /* Container & Background Override */
 .admin-fullscreen {
   position: relative;
-  min-height: calc(100vh - var(--navbar-height));
-  min-height: calc(100svh - var(--navbar-height));
   background: url("../../img/background/admin.jpg") no-repeat center center
     fixed;
   background-size: cover;

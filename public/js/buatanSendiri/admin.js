@@ -1,42 +1,32 @@
 // Semua elemen di bawah ini HANYA ada di halaman Dashboard Admin.
 // File ini dimuat di semua halaman (lewat footer), jadi setiap blok
 // dibungkus pengecekan null/length agar tidak error di halaman lain.
-// Fungsi bantu (postForm, notifySuccess, dll) ada di helpers.js.
+// Fungsi bantu (submitAction, notifySuccess, dll) ada di helpers.js.
 
 // =========================
 // STATUS BACA (auto-save saat dropdown diganti)
 // =========================
 document.querySelectorAll(".status-baca-select").forEach((select) => {
   select.addEventListener("change", async function () {
-    const id = this.dataset.id;
     const status = this.value;
 
-    try {
-      const formData = new FormData();
-      formData.append("id", id);
-      formData.append("status_baca", status);
+    const formData = new FormData();
+    formData.append("id", this.dataset.id);
+    formData.append("status_baca", status);
 
-      const result = await postForm(
-        BASEURL + "/daftarBuku/updateStatus",
-        formData,
-      );
+    const berhasil = await submitAction(
+      BASEURL + "/daftarBuku/updateStatus",
+      formData,
+      () => notifySuccess("Status baca diperbarui"),
+    );
 
-      if (result.ok) {
-        // simpan status terakhir yang BERHASIL disimpan
-        this.dataset.status = status;
-
-        notifySuccess("Status baca diperbarui");
-      } else {
-        // gagal disimpan -> kembalikan dropdown ke status sebelumnya
-        // supaya tampilan tidak berbohong soal data di database
-        this.value = this.dataset.status;
-
-        notifyFailure(result);
-      }
-    } catch (error) {
+    if (berhasil) {
+      // simpan status terakhir yang BERHASIL disimpan
+      this.dataset.status = status;
+    } else {
+      // gagal disimpan -> kembalikan dropdown ke status sebelumnya
+      // supaya tampilan tidak berbohong soal data di database
       this.value = this.dataset.status;
-
-      notifyServerError(error);
     }
   });
 });
@@ -45,7 +35,7 @@ document.querySelectorAll(".status-baca-select").forEach((select) => {
 // PROGRESS MEMBACA
 // =========================
 document.querySelectorAll(".progress-form").forEach((form) => {
-  form.addEventListener("submit", async function (e) {
+  form.addEventListener("submit", function (e) {
     e.preventDefault();
 
     const formData = new FormData();
@@ -59,20 +49,12 @@ document.querySelectorAll(".progress-form").forEach((form) => {
       this.querySelector(".total-halaman-input").value || "",
     );
 
-    try {
-      const result = await postForm(
-        BASEURL + "/daftarBuku/updateProgress",
-        formData,
-      );
-
-      if (result.ok) {
-        notifySuccess("Progress disimpan", { reload: true });
-      } else {
-        notifyFailure(result);
-      }
-    } catch (error) {
-      notifyServerError(error);
-    }
+    submitAction(
+      BASEURL + "/daftarBuku/updateProgress",
+      formData,
+      () => notifySuccess("Progress disimpan", { reload: true }),
+      this.querySelector('button[type="submit"]'),
+    );
   });
 });
 
@@ -83,7 +65,7 @@ const catatanModalEl = document.getElementById("catatanModal");
 const catatanForm = document.getElementById("catatanForm");
 
 if (catatanModalEl && catatanForm) {
-  const catatanModal = new bootstrap.Modal(catatanModalEl);
+  const catatanModal = bootstrap.Modal.getOrCreateInstance(catatanModalEl);
 
   document.querySelectorAll(".btn-catatan").forEach((button) => {
     button.addEventListener("click", function () {
@@ -96,24 +78,17 @@ if (catatanModalEl && catatanForm) {
     });
   });
 
-  catatanForm.addEventListener("submit", async function (e) {
+  catatanForm.addEventListener("submit", function (e) {
     e.preventDefault();
 
-    try {
-      const result = await postForm(
-        BASEURL + "/daftarBuku/updateCatatan",
-        new FormData(this),
-      );
-
-      if (result.ok) {
+    submitAction(
+      BASEURL + "/daftarBuku/updateCatatan",
+      new FormData(this),
+      () => {
         catatanModal.hide();
-
         notifySuccess("Catatan disimpan", { reload: true });
-      } else {
-        notifyFailure(result);
-      }
-    } catch (error) {
-      notifyServerError(error);
-    }
+      },
+      this.querySelector('button[type="submit"]'),
+    );
   });
 }

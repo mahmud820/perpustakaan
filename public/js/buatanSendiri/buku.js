@@ -1,7 +1,7 @@
 // Semua elemen di bawah ini HANYA ada di halaman Daftar Buku.
 // File ini dimuat di semua halaman (lewat footer), jadi setiap blok
 // dibungkus pengecekan null agar tidak error di halaman lain.
-// Fungsi bantu (postForm, notifySuccess, dll) ada di helpers.js.
+// Fungsi bantu (submitAction, notifySuccess, dll) ada di helpers.js.
 
 const addBookForm = document.getElementById("addBookForm");
 const addBookModal = document.getElementById("addBookModal");
@@ -9,50 +9,51 @@ const addBookModal = document.getElementById("addBookModal");
 if (addBookForm && addBookModal) {
   const modalTitle = addBookModal.querySelector(".modal-title");
   const submitButton = addBookForm.querySelector('button[type="submit"]');
+  const idInput = document.getElementById("id");
+  const fileBacaInfo = document.getElementById("fileBacaInfo");
+  const hapusWrapper = document.getElementById("hapusFileBacaWrapper");
+  const hapusCheckbox = document.getElementById("hapus_file_baca");
+
+  // Info "File saat ini" + checkbox hapus. Dipakai saat edit DAN saat reset modal.
+  // File input tidak bisa diisi otomatis oleh browser (alasan keamanan),
+  // jadi cukup tampilkan nama file yang sudah ada.
+  function tampilkanFileBaca(namaFile) {
+    if (fileBacaInfo) {
+      fileBacaInfo.textContent = namaFile ? "File saat ini: " + namaFile : "";
+    }
+    if (hapusWrapper) hapusWrapper.classList.toggle("d-none", !namaFile);
+    if (hapusCheckbox) hapusCheckbox.checked = false;
+  }
 
   // Fitur Tambah & Update Buku
-  addBookForm.addEventListener("submit", async function (e) {
+  addBookForm.addEventListener("submit", function (e) {
     e.preventDefault();
 
     const formData = new FormData(this);
     const id = formData.get("id");
-    const url = id
-      ? BASEURL + "/daftarBuku/update"
-      : BASEURL + "/daftarBuku/tambah";
+    const url = BASEURL + (id ? "/daftarBuku/update" : "/daftarBuku/tambah");
 
-    try {
-      const result = await postForm(url, formData);
-
-      if (result.ok) {
-        bootstrap.Modal.getInstance(addBookModal).hide();
+    submitAction(
+      url,
+      formData,
+      () => {
+        bootstrap.Modal.getOrCreateInstance(addBookModal).hide();
 
         notifySuccess("Berhasil", {
           text: id ? "Buku berhasil diupdate" : "Buku berhasil ditambahkan",
           timer: 1500,
           reload: true,
         });
-      } else {
-        notifyFailure(result);
-      }
-    } catch (error) {
-      notifyServerError(error);
-    }
+      },
+      submitButton,
+    );
   });
 
   // Reset Modal Saat Ditutup
   addBookModal.addEventListener("hidden.bs.modal", function () {
     addBookForm.reset();
-
-    document.getElementById("id").value = "";
-
-    const fileBacaInfo = document.getElementById("fileBacaInfo");
-    if (fileBacaInfo) fileBacaInfo.textContent = "";
-
-    const hapusWrapper = document.getElementById("hapusFileBacaWrapper");
-    if (hapusWrapper) hapusWrapper.classList.add("d-none");
-
-    const hapusCheckbox = document.getElementById("hapus_file_baca");
-    if (hapusCheckbox) hapusCheckbox.checked = false;
+    idInput.value = "";
+    tampilkanFileBaca("");
 
     modalTitle.textContent = "Tambah Buku";
     submitButton.textContent = "Simpan";
@@ -61,7 +62,7 @@ if (addBookForm && addBookModal) {
   // Fitur Edit Buku
   document.querySelectorAll(".btn-edit").forEach((button) => {
     button.addEventListener("click", function () {
-      document.getElementById("id").value = this.dataset.id;
+      idInput.value = this.dataset.id;
 
       addBookForm.elements["judul"].value = this.dataset.judul;
       addBookForm.elements["penulis"].value = this.dataset.penulis;
@@ -69,25 +70,12 @@ if (addBookForm && addBookModal) {
       addBookForm.elements["sinopsis"].value = this.dataset.sinopsis;
       addBookForm.elements["link_baca"].value = this.dataset.linkBaca;
 
-      // File input tidak bisa diisi otomatis oleh browser (alasan keamanan),
-      // jadi cukup tampilkan info file yang sudah ada saat ini.
-      const fileBacaInfo = document.getElementById("fileBacaInfo");
-      const hapusWrapper = document.getElementById("hapusFileBacaWrapper");
-
-      if (this.dataset.fileBaca) {
-        if (fileBacaInfo) {
-          fileBacaInfo.textContent = "File saat ini: " + this.dataset.fileBaca;
-        }
-        if (hapusWrapper) hapusWrapper.classList.remove("d-none");
-      } else {
-        if (fileBacaInfo) fileBacaInfo.textContent = "";
-        if (hapusWrapper) hapusWrapper.classList.add("d-none");
-      }
+      tampilkanFileBaca(this.dataset.fileBaca);
 
       modalTitle.textContent = "Edit Buku";
       submitButton.textContent = "Update";
 
-      new bootstrap.Modal(addBookModal).show();
+      bootstrap.Modal.getOrCreateInstance(addBookModal).show();
     });
   });
 }
@@ -95,8 +83,6 @@ if (addBookForm && addBookModal) {
 // Fitur Hapus
 document.querySelectorAll(".btn-delete").forEach((button) => {
   button.addEventListener("click", async function () {
-    const id = this.dataset.id;
-
     const konfirmasi = await Swal.fire({
       title: "Yakin?",
       text: "Data buku akan dihapus",
@@ -108,23 +94,15 @@ document.querySelectorAll(".btn-delete").forEach((button) => {
 
     if (!konfirmasi.isConfirmed) return;
 
-    try {
-      const formData = new FormData();
-      formData.append("id", id);
+    const formData = new FormData();
+    formData.append("id", this.dataset.id);
 
-      const result = await postForm(BASEURL + "/daftarBuku/hapus", formData);
-
-      if (result.ok) {
-        notifySuccess("Berhasil", {
-          text: "Buku berhasil dihapus",
-          timer: 1500,
-          reload: true,
-        });
-      } else {
-        notifyFailure(result);
-      }
-    } catch (error) {
-      notifyServerError(error);
-    }
+    submitAction(BASEURL + "/daftarBuku/hapus", formData, () =>
+      notifySuccess("Berhasil", {
+        text: "Buku berhasil dihapus",
+        timer: 1500,
+        reload: true,
+      }),
+    );
   });
 });

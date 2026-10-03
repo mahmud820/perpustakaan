@@ -1,7 +1,6 @@
 <?php
 
-class Beranda extends Controller
-{
+class Beranda extends Controller {
   public function index()
   {
     $data['judul'] = 'Beranda';

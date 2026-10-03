@@ -1,8 +1,6 @@
 /* Tampilan Detail */
 .detail-page {
-  min-height: calc(100vh - var(--navbar-height));
-  min-height: calc(100svh - var(--navbar-height));
-  background: url("../../img//background/background2.jpg") center center / cover
+  background: url("../../img/background/background2.jpg") center center / cover
     no-repeat;
 }
 

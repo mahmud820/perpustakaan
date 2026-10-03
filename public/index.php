@@ -1,5 +1,8 @@
 <?php
-if (!session_id()) {
+// Mode ketat: PHP menolak ID sesi yang tidak pernah dibuat server (mencegah session fixation).
+ini_set('session.use_strict_mode', '1');
+
+if (session_status() === PHP_SESSION_NONE) {
     $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
 
@@ -15,6 +18,6 @@ if (!session_id()) {
     session_start();
 }
 
-require_once '../app/init.php';
+require_once __DIR__ . '/../app/init.php';
 
-$app = new App;
+$app = new App();

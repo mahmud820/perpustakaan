@@ -41,7 +41,15 @@ class User
     {
         $this->db->query('SELECT * FROM users WHERE id = :id');
         $this->db->bind('id', $id);
-        return $this->db->single();
+        $user = $this->db->single();
+
+        // Hash password hanya dibutuhkan saat login (lewat getByUsername), bukan untuk profil.
+        // Dibuang di sini supaya tidak ikut terkirim ke view atau tercetak saat debugging.
+        if (is_array($user)) {
+            unset($user['password']);
+        }
+
+        return $user;
     }
 
     public function updateProfileData($data, $files)

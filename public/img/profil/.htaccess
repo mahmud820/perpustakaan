@@ -1,0 +1,12 @@
+# Cegah eksekusi PHP/CGI di folder foto profil (upload user).
+# Defense in depth di atas validasi MIME + getimagesize yang sudah dilakukan aplikasi.
+# Sama dengan pengaman di img/dataGambar/ dan uploads/.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|pht|phar)$">
+    Require all denied
+</FilesMatch>
+
+Options -Indexes -ExecCGI
